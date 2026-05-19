@@ -1,0 +1,57 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: agent-jd-java
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/${MYSQL_DATABASE:agent_jd}?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      database: ${REDIS_DATABASE:0}
+      timeout: 3s
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 30MB
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: assign_id
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+jwt:
+  secret: ${JWT_SECRET:change-me-change-me-change-me-32-bytes}
+  access-token-ttl-seconds: ${JWT_ACCESS_TTL:7200}
+
+storage:
+  local:
+    root-path: ${STORAGE_ROOT:./data/uploads}
+    public-base-url: ${STORAGE_PUBLIC_BASE_URL:http://localhost:8080/api/files/download}
+
+agent:
+  python:
+    base-url: ${AGENT_BASE_URL:http://localhost:8000}
+    internal-token: ${AGENT_INTERNAL_TOKEN:change-me}
+    connect-timeout-ms: ${AGENT_CONNECT_TIMEOUT_MS:3000}
+    response-timeout-ms: ${AGENT_RESPONSE_TIMEOUT_MS:180000}
+    max-retry: ${AGENT_MAX_RETRY:2}
+    retry-backoff-ms: ${AGENT_RETRY_BACKOFF_MS:300}
+
+logging:
+  level:
+    root: INFO
+    com.agentjd: DEBUG

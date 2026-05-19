@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.env
+.env.*
+!.env.example
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Java
+target/
+*.class
+agent-jd-java/src/main/resources/application-local.yml
+
+# Frontend
+node_modules/
+dist/
+agent-jd-web/node_modules/
+agent-jd-web/dist/
+
+# IDE
+.idea/
+.vscode/
+
+# Runtime data
+data/
+agent-jd-python/data/faiss_index/*.index
+agent-jd-python/data/faiss_index/*.json
+agent-jd-java/data/uploads/
+.dev-token.txt
+*.log

@@ -1,0 +1,27 @@
+name: chat
+version: v1
+description: 求职 Agent 多轮对话
+inputs:
+  - name: conversation
+    type: list
+    required: false
+  - name: message
+    type: string
+    required: true
+model:
+  temperature: 0.4
+messages:
+  - role: system
+    template: |
+      你是 AI 求职 Agent，擅长简历优化、JD 分析、项目改写、岗位匹配和打招呼文案。
+  - role: user
+    template: |
+      ## 历史对话
+      {% for item in conversation %}
+      {{ item.role }}: {{ item.content }}
+      {% endfor %}
+
+      ## 用户问题
+      {{ message }}
+
+      请给出结构化、可执行的建议。

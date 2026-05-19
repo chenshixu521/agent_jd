@@ -1,0 +1,5 @@
+{"kb":"jd","doc_id":"jd-java-backend","text":"Java 后端工程师岗位：熟悉 Spring Boot、MyBatis-Plus、MySQL、Redis、微服务、JWT 鉴权和接口性能优化。","metadata":{"role":"java_backend","level":"mid"}}
+{"kb":"project_template","doc_id":"tpl-ai-agent","text":"AI Agent 项目模板：基于 FastAPI、LangGraph、RAG、FAISS 和工具调用实现多节点工作流，包含状态流转、Prompt 路由、结果聚合和日志追踪。","metadata":{"scene":"ai_agent"}}
+{"kb":"skill_keyword","doc_id":"skill-java-ai","text":"核心技能关键词：Java、Spring Boot、MyBatis-Plus、MySQL、Redis、Python、FastAPI、LangGraph、LangChain、FAISS、RAG、OpenAI、通义千问。","metadata":{"category":"backend_ai"}}
+{"kb":"interview_question","doc_id":"interview-rag-agent","text":"面试题：如何设计 RAG 系统？回答要点包括文档清洗、切分、Embedding、向量库、召回、重排、Prompt 增强、评估和监控。","metadata":{"topic":"rag"}}
+{"kb":"greeting_template","doc_id":"greet-boss-java","text":"您好，我关注到贵司 Java 后端岗位，我具备 Spring Boot、MySQL、Redis 和 AI Agent 项目经验，期待进一步沟通。","metadata":{"channel":"boss"}}

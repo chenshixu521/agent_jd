@@ -1,0 +1,104 @@
+CREATE DATABASE IF NOT EXISTS agent_jd DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE agent_jd;
+
+CREATE TABLE IF NOT EXISTS u_user (
+  id BIGINT PRIMARY KEY,
+  username VARCHAR(64) NOT NULL UNIQUE,
+  email VARCHAR(128),
+  phone VARCHAR(32),
+  password_hash VARCHAR(128) NOT NULL,
+  status TINYINT NOT NULL DEFAULT 1,
+  role VARCHAR(32) NOT NULL DEFAULT 'USER',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  is_deleted TINYINT NOT NULL DEFAULT 0,
+  KEY idx_status_created (status, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS f_file_object (
+  id BIGINT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  original_name VARCHAR(255) NOT NULL,
+  stored_name VARCHAR(255) NOT NULL,
+  content_type VARCHAR(128),
+  size_bytes BIGINT NOT NULL,
+  storage_path VARCHAR(512) NOT NULL,
+  url VARCHAR(512),
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_user_created (user_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS r_resume (
+  id BIGINT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  title VARCHAR(128) NOT NULL,
+  source TINYINT NOT NULL,
+  file_id BIGINT,
+  file_url VARCHAR(512),
+  raw_text MEDIUMTEXT,
+  status TINYINT NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted TINYINT NOT NULL DEFAULT 0,
+  KEY idx_user_created (user_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS j_jd (
+  id BIGINT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  title VARCHAR(128) NOT NULL,
+  company VARCHAR(128),
+  city VARCHAR(32),
+  raw_text MEDIUMTEXT NOT NULL,
+  source_url VARCHAR(512),
+  status TINYINT NOT NULL DEFAULT 1,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted TINYINT NOT NULL DEFAULT 0,
+  KEY idx_user_created (user_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS t_ai_task (
+  id BIGINT PRIMARY KEY,
+  task_uuid CHAR(36) NOT NULL UNIQUE,
+  user_id BIGINT NOT NULL,
+  capability VARCHAR(64) NOT NULL,
+  action VARCHAR(64) NOT NULL,
+  biz_id BIGINT,
+  status TINYINT NOT NULL,
+  progress TINYINT NOT NULL DEFAULT 0,
+  input_json JSON,
+  output_json JSON,
+  error_msg VARCHAR(1024),
+  trace_id VARCHAR(64),
+  started_at DATETIME,
+  finished_at DATETIME,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  KEY idx_user_status (user_id, status, created_at),
+  KEY idx_task_uuid (task_uuid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS c_conversation (
+  id BIGINT PRIMARY KEY,
+  user_id BIGINT NOT NULL,
+  title VARCHAR(128) NOT NULL,
+  scene VARCHAR(64),
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  deleted TINYINT NOT NULL DEFAULT 0,
+  KEY idx_user_updated (user_id, updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS c_conversation_message (
+  id BIGINT PRIMARY KEY,
+  conversation_id BIGINT NOT NULL,
+  user_id BIGINT NOT NULL,
+  role VARCHAR(32) NOT NULL,
+  content MEDIUMTEXT NOT NULL,
+  task_uuid CHAR(36),
+  metadata_json JSON,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_conversation_created (conversation_id, created_at),
+  KEY idx_user_created (user_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

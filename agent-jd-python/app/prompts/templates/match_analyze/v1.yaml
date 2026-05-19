@@ -1,0 +1,43 @@
+name: match_analyze
+version: v1
+description: 使用大模型分析简历与 JD 匹配度
+inputs:
+  - name: resume_text
+    type: string
+    required: true
+  - name: jd_text
+    type: string
+    required: true
+  - name: base_match
+    type: object
+    required: false
+model:
+  temperature: 0.2
+messages:
+  - role: system
+    template: |
+      你是资深招聘顾问和技术面试官。请基于简历与 JD 做客观匹配分析，不得编造候选人经历。必须只输出合法 JSON。
+  - role: user
+    template: |
+      ## 简历
+      {{ resume_text }}
+
+      ## JD
+      {{ jd_text }}
+
+      ## 规则初算结果
+      {{ base_match }}
+
+      请输出 JSON，字段如下：
+      {
+        "total_score": 0-100,
+        "hard_score": 0-100,
+        "soft_score": 0-100,
+        "exp_score": 0-100,
+        "matched_skills": ["技能"],
+        "missing_skills": ["技能"],
+        "suggestions": ["具体补强建议"],
+        "summary": "200字以内匹配总结",
+        "risks": ["面试风险点"],
+        "advantages": ["候选人优势"]
+      }

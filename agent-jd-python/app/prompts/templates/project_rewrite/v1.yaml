@@ -1,0 +1,43 @@
+name: project_rewrite
+version: v1
+description: 使用大模型按目标 JD 改写项目经历
+inputs:
+  - name: project_text
+    type: string
+    required: true
+  - name: jd_text
+    type: string
+    required: false
+  - name: base_rewrite
+    type: object
+    required: false
+  - name: examples
+    type: list
+    required: false
+model:
+  temperature: 0.35
+messages:
+  - role: system
+    template: |
+      你是资深技术面试官和简历优化顾问。请基于用户真实项目经历进行改写，不得编造不存在的业务、指标或技术细节。
+  - role: user
+    template: |
+      ## 原始项目经历
+      {{ project_text }}
+
+      ## 目标 JD
+      {{ jd_text }}
+
+      ## 规则初稿
+      {{ base_rewrite }}
+
+      ## 可参考表达
+      {% for item in examples %}
+      - {{ item }}
+      {% endfor %}
+
+      请输出 Markdown，控制在 600 字以内，包含：
+      1. STAR 改写版项目描述
+      2. 可放入简历的 3-5 条项目 bullet
+      3. 面试可展开亮点
+      要求语言自然、技术表达具体、适配目标 JD。
