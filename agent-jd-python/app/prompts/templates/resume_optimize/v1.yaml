@@ -17,6 +17,9 @@ inputs:
   - name: rag_context
     type: string
     required: false
+  - name: validation_feedback
+    type: list
+    required: false
 model:
   temperature: 0.3
 messages:
@@ -42,8 +45,19 @@ messages:
       - {{ item }}
       {% endfor %}
 
+      {% if validation_feedback %}
+      ## 上一次输出校验反馈
+      {% for item in validation_feedback %}
+      - {{ item }}
+      {% endfor %}
+      请针对以上问题修正输出，不要重复无依据内容。
+      {% endif %}
+
       请直接输出 Markdown，控制在 600 字以内，包含：
       1. 匹配总结
       2. 简历优化建议
       3. 技能补强建议
-      4. 项目描述优化方向。
+      4. 项目描述优化方向
+      5. 引用到 RAG 内容时使用 `[来源: doc_id]` 标注来源。
+
+      不得编造简历和 JD 中不存在的业务指标、项目结果、任职经历或技能。

@@ -1,9 +1,13 @@
+import re
+
+from app.agents.schemas import build_match_result
 from app.infra.redis_client import append_event
 from app.llm.factory import get_llm
 from app.memory.schema import ChatMessage
 from app.memory.session_store import get_session_store
 from app.prompts import prompt_registry
-from app.rag.retriever import abuild_prompt_context, aretrieve_hits
+from app.rag.prompt_enhancer import PromptEnhancer
+from app.rag.retriever import aretrieve_hits
 from app.tools.greeting_generate_tool import greeting_generate_tool
 from app.tools.jd_parser_tool import jd_parser_tool
 from app.tools.keyword_extract_tool import keyword_extract_tool
@@ -17,6 +21,33 @@ async def emit(state: dict, stage: str, payload: dict | None = None) -> None:
     event = {"stage": stage, "payload": payload or {}}
     state.setdefault("events", []).append(event)
     await append_event(task_id, event)
+
+
+async def validate_resume_optimize_input_node(state: dict) -> dict:
+    resume_text = (state.get("resume_text") or state.get("payload", {}).get("resume_text", "")).strip()
+    jd_text = (state.get("jd_text") or state.get("payload", {}).get("jd_text", "")).strip()
+    missing_fields = []
+    if len(resume_text) < 40:
+        missing_fields.append("resume_text")
+    if len(jd_text) < 20:
+        missing_fields.append("jd_text")
+    await emit(state, "validate_input", {"valid": not missing_fields, "missing_fields": missing_fields})
+    return {
+        **state,
+        "resume_text": resume_text,
+        "jd_text": jd_text,
+        "input_valid": not missing_fields,
+        "missing_fields": missing_fields,
+    }
+
+
+async def clarify_input_node(state: dict) -> dict:
+    labels = {"resume_text": "完整简历正文", "jd_text": "目标岗位 JD"}
+    missing = [labels.get(item, item) for item in state.get("missing_fields", [])]
+    questions = "\n".join(f"- 请补充{item}，避免在信息不足时生成泛化建议。" for item in missing)
+    clarification = f"## 需要补充信息\n\n{questions}"
+    await emit(state, "clarify_input", {"missing_fields": state.get("missing_fields", [])})
+    return {**state, "clarification": clarification, "advice": clarification, "output_valid": True}
 
 
 async def parse_resume_node(state: dict) -> dict:
@@ -42,9 +73,9 @@ async def extract_keywords_node(state: dict) -> dict:
 
 async def retrieve_rag_node(state: dict) -> dict:
     query = "\n".join([state.get("jd_text", ""), state.get("resume_text", ""), state.get("project_text", "")])
-    hits = await aretrieve_hits(["jd", "project_template", "skill_keyword", "interview_question", "greeting_template"], query, top_k=6)
+    hits = await aretrieve_hits(["jd", "project_template", "skill_keyword", "interview_question"], query, top_k=6)
     examples = [hit.text for hit in hits]
-    prompt_context = await abuild_prompt_context(["jd", "project_template", "skill_keyword", "interview_question"], query, top_k=6)
+    prompt_context = PromptEnhancer().build_context(query, hits)
     await emit(state, "retrieve_rag", {"count": len(examples), "kbs": sorted({hit.kb for hit in hits})})
     return {**state, "rag_examples": examples, "rag_hits": hits, "rag_prompt_context": prompt_context}
 
@@ -58,7 +89,7 @@ async def match_node(state: dict) -> dict:
         base_match=base,
     )
     ai_result = await get_llm().json_mode(messages, max_tokens=900)
-    result = {**base, **ai_result}
+    result = build_match_result(base, ai_result).model_dump()
     await emit(state, "match_analysis", {"score": result.get("total_score")})
     return {**state, "match": result}
 
@@ -77,7 +108,7 @@ async def rewrite_project_node(state: dict) -> dict:
     rewritten = await get_llm().chat(messages, max_tokens=900)
     result = {**base, "rewritten": rewritten}
     await emit(state, "project_rewrite", {"skills": result.get("skills", [])})
-    return {**state, "project_text": project_text, "rewrite": result}
+    return {**state, "project_text": project_text, "rewrite": result, "rag_hits": hits}
 
 
 async def greeting_node(state: dict) -> dict:
@@ -88,6 +119,7 @@ async def greeting_node(state: dict) -> dict:
 
 
 async def advice_node(state: dict) -> dict:
+    attempts = state.get("generation_attempts", 0) + 1
     messages = prompt_registry.render(
         "resume_optimize/v1",
         resume_text=truncate_text(state.get("resume_text", ""), 5000),
@@ -95,10 +127,34 @@ async def advice_node(state: dict) -> dict:
         match=state.get("match", {}),
         examples=(state.get("rag_examples", []) or [])[:3],
         rag_context=truncate_text(state.get("rag_prompt_context", ""), 1200),
+        validation_feedback=state.get("validation_feedback", []),
     )
     advice = await get_llm().chat(messages, max_tokens=900)
-    await emit(state, "generate_advice", {"length": len(advice)})
-    return {**state, "advice": advice}
+    await emit(state, "generate_advice", {"length": len(advice), "attempt": attempts})
+    return {**state, "advice": advice, "generation_attempts": attempts}
+
+
+async def validate_advice_node(state: dict) -> dict:
+    advice = (state.get("advice") or "").strip()
+    feedback: list[str] = []
+    if len(advice) < 120:
+        feedback.append("输出过短，需要提供可执行的匹配总结和简历优化建议")
+    if "建议" not in advice and "优化" not in advice:
+        feedback.append("输出缺少明确的优化建议")
+
+    metric_pattern = r"\d+(?:\.\d+)?%"
+    grounded_metrics = set(re.findall(metric_pattern, "\n".join([state.get("resume_text", ""), state.get("jd_text", "")])))
+    for field in ("total_score", "hard_score", "soft_score", "exp_score"):
+        value = state.get("match", {}).get(field)
+        if isinstance(value, (int, float)):
+            grounded_metrics.update({f"{value}%", f"{value:g}%"})
+    ungrounded_metrics = sorted(set(re.findall(metric_pattern, advice)) - grounded_metrics)
+    if ungrounded_metrics:
+        feedback.append(f"发现无输入依据的量化指标：{', '.join(ungrounded_metrics)}；不得编造结果数据")
+
+    valid = not feedback
+    await emit(state, "validate_advice", {"valid": valid, "feedback": feedback})
+    return {**state, "output_valid": valid, "validation_feedback": feedback}
 
 
 def truncate_text(text: str, limit: int) -> str:
@@ -135,6 +191,17 @@ async def chat_node(state: dict) -> dict:
 
 
 async def finalize_node(state: dict) -> dict:
+    sources = []
+    for hit in state.get("rag_hits", []) or []:
+        sources.append(
+            {
+                "kb": hit.kb,
+                "doc_id": hit.doc_id,
+                "chunk_id": hit.chunk_id,
+                "score": round(hit.score, 4),
+                "text": truncate_text(hit.text, 240),
+            }
+        )
     data = {
         "resume": state.get("parsed_resume"),
         "jd": state.get("parsed_jd"),
@@ -143,8 +210,17 @@ async def finalize_node(state: dict) -> dict:
         "rewrite": state.get("rewrite"),
         "greeting": state.get("greeting"),
         "advice": state.get("advice"),
+        "clarification": state.get("clarification"),
         "session_id": state.get("session_id"),
         "rag_examples": state.get("rag_examples", []),
+        "sources": sources,
+        "validation": {
+            "valid": state.get("output_valid"),
+            "feedback": state.get("validation_feedback", []),
+            "attempts": state.get("generation_attempts", 0),
+        }
+        if state.get("capability") == "resume" and state.get("action") in {"optimize", "advice"}
+        else None,
         "events": state.get("events", []),
     }
     data = {k: v for k, v in data.items() if v not in (None, [], {})}
