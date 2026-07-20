@@ -2,7 +2,7 @@
 
 一个面向求职场景的全栈 AI 应用原型。项目使用 Spring Boot 管理用户、简历、JD、文件、会话和 AI 任务，使用 FastAPI + LangGraph 承载大模型工作流，前端使用 Vue 3 提供完整交互页面。
 
-> 当前版本定位为可运行、可评测的个人项目。生产级任务队列、SSE、容器化全量部署和可观测性仍在 Roadmap 中，不作为已完成功能描述。
+> 当前版本定位为可运行、可评测的个人项目，支持 Docker Compose 一键启动。生产级任务队列、SSE 和可观测性仍在 Roadmap 中，不作为已完成功能描述。
 
 ## 已实现能力
 
@@ -47,6 +47,8 @@ FAISS 向量召回 + BM25 关键词召回 + RRF 融合
 
 ```text
 agent-jd/
+├── compose.yaml                # 完整服务编排
+├── .env.example                # Docker 统一环境变量
 ├── agent-jd-java/              # Spring Boot 业务后端
 ├── agent-jd-python/            # FastAPI + LangGraph Agent 服务
 │   ├── app/                    # 应用代码
@@ -60,7 +62,32 @@ agent-jd/
 └── docs/                       # 设计文档（包含部分 Roadmap 方案）
 ```
 
-## 快速启动
+## Docker 一键启动
+
+准备 Docker 24+ 和 Docker Compose v2，然后执行：
+
+```bash
+cp .env.example .env
+# 编辑 .env，至少配置一个真实的模型 API Key
+docker compose up -d --build
+```
+
+首次启动会构建 Java、Python、Web 镜像，下载中文 Embedding 模型并导入种子知识库。模型和运行数据保存在 Docker Volume，后续重启不会重复下载。
+
+访问：<http://localhost:3000>
+
+```bash
+# 查看状态和日志
+docker compose ps
+docker compose logs -f python java
+
+# 停止服务，保留数据
+docker compose down
+```
+
+未配置模型 API Key 时，注册、登录、简历/JD 管理等业务功能仍可使用，AI 任务会返回配置错误。修改 `WEB_PORT` 可以更换前端端口。
+
+## 本地开发
 
 ### 1. 启动 MySQL 与 Redis
 
@@ -80,12 +107,13 @@ cd agent-jd-python
 cp .env.example .env
 python3 -m venv .venv
 source .venv/bin/activate
+pip install --no-deps -r requirements-torch-cpu.txt
 pip install -r requirements.txt -r requirements-embedding.txt
 python -m scripts.import_knowledge
 uvicorn app.main:app --reload --port 8000
 ```
 
-调用真实大模型前，需要在 `.env` 中设置对应 API Key。中文 Embedding 依赖被单独放在 `requirements-embedding.txt`，避免基础测试环境安装 CUDA 版本 PyTorch；模型首次运行时会从 Hugging Face 下载。
+调用真实大模型前，需要在 `.env` 中设置对应 API Key。CPU PyTorch 与中文 Embedding 依赖分别放在独立 requirements 文件中，基础测试环境无需安装模型依赖；模型首次运行时会从 Hugging Face 下载。
 
 ### 3. 启动 Java 后端
 
@@ -142,5 +170,6 @@ cd agent-jd-web && npm run build
 - [ ] SSE 流式进度、断线重连和事件回放
 - [ ] Reranker、离线评测报告和答案忠实度评测
 - [ ] PII 脱敏、Prompt Injection 防护、调用配额与审计
-- [ ] Java/Python/Web 全量 Dockerfile 与 GitHub Actions
+- [x] Java/Python/Web Dockerfile 与 Docker Compose 一键部署
+- [ ] GitHub Actions 自动测试与镜像构建
 - [ ] LangGraph Checkpoint、Human-in-the-loop 和更多条件路由

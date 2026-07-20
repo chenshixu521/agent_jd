@@ -27,6 +27,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 
 # 使用本地中文语义 Embedding 时安装 CPU PyTorch 与 sentence-transformers
+pip install --no-deps -r requirements-torch-cpu.txt
 pip install -r requirements-embedding.txt
 
 python -m scripts.import_knowledge
