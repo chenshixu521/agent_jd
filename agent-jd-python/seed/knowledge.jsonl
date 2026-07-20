@@ -1,5 +1,28 @@
-{"kb":"jd","doc_id":"jd-java-backend","text":"Java 后端工程师岗位：熟悉 Spring Boot、MyBatis-Plus、MySQL、Redis、微服务、JWT 鉴权和接口性能优化。","metadata":{"role":"java_backend","level":"mid"}}
-{"kb":"project_template","doc_id":"tpl-ai-agent","text":"AI Agent 项目模板：基于 FastAPI、LangGraph、RAG、FAISS 和工具调用实现多节点工作流，包含状态流转、Prompt 路由、结果聚合和日志追踪。","metadata":{"scene":"ai_agent"}}
-{"kb":"skill_keyword","doc_id":"skill-java-ai","text":"核心技能关键词：Java、Spring Boot、MyBatis-Plus、MySQL、Redis、Python、FastAPI、LangGraph、LangChain、FAISS、RAG、OpenAI、通义千问。","metadata":{"category":"backend_ai"}}
-{"kb":"interview_question","doc_id":"interview-rag-agent","text":"面试题：如何设计 RAG 系统？回答要点包括文档清洗、切分、Embedding、向量库、召回、重排、Prompt 增强、评估和监控。","metadata":{"topic":"rag"}}
-{"kb":"greeting_template","doc_id":"greet-boss-java","text":"您好，我关注到贵司 Java 后端岗位，我具备 Spring Boot、MySQL、Redis 和 AI Agent 项目经验，期待进一步沟通。","metadata":{"channel":"boss"}}
+{"kb":"jd","doc_id":"jd-java-backend","text":"Java 后端工程师岗位：要求熟悉 Java 17、Spring Boot、MyBatis-Plus、MySQL、Redis，能够设计 REST API，并具备接口性能优化和线上故障排查经验。","metadata":{"role":"java_backend","level":"mid"}}
+{"kb":"jd","doc_id":"jd-java-distributed","text":"高级 Java 工程师岗位：要求具备微服务、分布式事务、消息队列、缓存一致性、服务治理和高并发系统设计经验，熟悉 Spring Cloud、Kafka 或 RocketMQ。","metadata":{"role":"java_backend","level":"senior"}}
+{"kb":"jd","doc_id":"jd-ai-agent-engineer","text":"大模型应用工程师岗位：负责 Agent 工作流、RAG 知识库、Prompt 工程、工具调用和模型评测，要求熟悉 Python、FastAPI、LangChain 或 LangGraph。","metadata":{"role":"ai_agent","level":"mid"}}
+{"kb":"jd","doc_id":"jd-rag-engineer","text":"RAG 工程师岗位：负责文档清洗切分、Embedding、向量数据库、混合检索、重排、引用溯源和离线评测，关注 Recall@K、MRR、答案忠实度与延迟。","metadata":{"role":"rag","level":"mid"}}
+{"kb":"jd","doc_id":"jd-python-backend","text":"Python 后端工程师岗位：要求熟悉 FastAPI、asyncio、Pydantic、Redis、PostgreSQL，能够开发异步 API、任务队列和自动化测试。","metadata":{"role":"python_backend","level":"mid"}}
+{"kb":"jd","doc_id":"jd-frontend-vue","text":"Vue 前端工程师岗位：要求熟悉 Vue3、TypeScript、Vite、Pinia、Axios 和组件化开发，具备接口联调、状态管理和前端性能优化经验。","metadata":{"role":"frontend","level":"mid"}}
+{"kb":"project_template","doc_id":"tpl-langgraph-workflow","text":"LangGraph 项目描述模板：将复杂任务拆分为输入校验、规划、工具执行、结果校验和汇总节点，通过条件边处理信息不足、工具失败与有限重试。","metadata":{"scene":"agent_workflow"}}
+{"kb":"project_template","doc_id":"tpl-rag-hybrid","text":"RAG 项目描述模板：完成文档清洗与分块，使用语义向量和 BM25 双路召回，通过 RRF 或 Reranker 融合排序，并向最终答案返回引用来源。","metadata":{"scene":"rag"}}
+{"kb":"project_template","doc_id":"tpl-rag-evaluation","text":"RAG 评测项目模板：构建带相关文档标注的查询集，计算 Recall@3、Recall@5、MRR 和 NDCG，对比不同 Embedding、分块策略与混合检索参数。","metadata":{"scene":"rag_evaluation"}}
+{"kb":"project_template","doc_id":"tpl-async-task","text":"异步任务项目模板：API 接收请求并持久化任务，使用 Redis Stream 或消息队列解耦 Worker，提供消费确认、幂等键、重试、死信队列和任务恢复。","metadata":{"scene":"async_task"}}
+{"kb":"project_template","doc_id":"tpl-observability","text":"可观测性项目模板：使用 traceId 贯穿网关、Java 服务、Python Agent 与 LLM 调用，记录节点耗时、Token 消耗、错误类型和模型调用成功率。","metadata":{"scene":"observability"}}
+{"kb":"project_template","doc_id":"tpl-file-processing","text":"文档处理项目模板：支持 PDF、DOCX、TXT 上传解析，通过扩展名白名单、文件魔数、大小限制和文本标准化降低恶意文件与解析失败风险。","metadata":{"scene":"document"}}
+{"kb":"skill_keyword","doc_id":"skill-java-core","text":"Java 后端核心技能：Java 17、Spring Boot、Spring MVC、MyBatis-Plus、MySQL、Redis、JWT、WebClient、JUnit、Maven。","metadata":{"category":"java"}}
+{"kb":"skill_keyword","doc_id":"skill-distributed","text":"分布式系统关键词：微服务、服务治理、限流、熔断、降级、分布式锁、缓存一致性、消息队列、Kafka、RocketMQ、幂等。","metadata":{"category":"distributed"}}
+{"kb":"skill_keyword","doc_id":"skill-agent","text":"Agent 工程关键词：LangGraph、StateGraph、状态管理、条件路由、工具调用、Checkpoint、Human-in-the-loop、反思、有限重试。","metadata":{"category":"agent"}}
+{"kb":"skill_keyword","doc_id":"skill-rag","text":"RAG 核心关键词：文档切分、Embedding、FAISS、向量检索、BM25、混合检索、RRF、Reranker、引用溯源、Recall@K、MRR。","metadata":{"category":"rag"}}
+{"kb":"skill_keyword","doc_id":"skill-python","text":"Python AI 应用技能：Python 3.11、FastAPI、Pydantic、asyncio、pytest、httpx、OpenAI API、通义千问、sentence-transformers。","metadata":{"category":"python"}}
+{"kb":"skill_keyword","doc_id":"skill-security","text":"LLM 应用安全关键词：Prompt Injection、PII 脱敏、输出校验、工具权限最小化、Secret 管理、文件安全、调用限流和审计日志。","metadata":{"category":"security"}}
+{"kb":"interview_question","doc_id":"interview-rag-design","text":"面试题：如何设计 RAG 系统？回答应覆盖文档解析、分块、Embedding、向量库、关键词召回、融合排序、Prompt 增强、引用、评测和监控。","metadata":{"topic":"rag"}}
+{"kb":"interview_question","doc_id":"interview-rag-eval","text":"面试题：如何评估 RAG？检索侧使用 Recall@K、MRR、NDCG；生成侧关注答案正确性、忠实度、引用准确率、拒答率、延迟和成本。","metadata":{"topic":"evaluation"}}
+{"kb":"interview_question","doc_id":"interview-langgraph","text":"面试题：为什么使用 LangGraph？重点说明显式状态、条件边、循环与有限重试、持久化检查点、人工介入，以及相比固定调用链的适用场景。","metadata":{"topic":"agent"}}
+{"kb":"interview_question","doc_id":"interview-async-task","text":"面试题：如何保证异步任务可靠？需要说明任务持久化、幂等、至少一次消费、ACK、Pending 恢复、重试退避、死信和可观测性。","metadata":{"topic":"backend"}}
+{"kb":"interview_question","doc_id":"interview-prompt-injection","text":"面试题：如何防御 Prompt Injection？区分系统指令与外部内容，对检索文档做不可信标记，限制工具权限，校验输出，并对敏感操作增加人工确认。","metadata":{"topic":"security"}}
+{"kb":"interview_question","doc_id":"interview-llm-cost","text":"面试题：如何优化 LLM 应用成本和延迟？可从模型路由、上下文裁剪、Prompt 缓存、流式输出、批量 Embedding、超时重试和指标监控展开。","metadata":{"topic":"llm_ops"}}
+{"kb":"greeting_template","doc_id":"greet-boss-java","text":"Boss 直聘 Java 岗位招呼模板：您好，我具备 Spring Boot、MySQL、Redis 和接口开发经验，并完成过 Java 与 AI 服务协同项目，希望进一步了解岗位业务。","metadata":{"channel":"boss","role":"java"}}
+{"kb":"greeting_template","doc_id":"greet-boss-agent","text":"Boss 直聘 Agent 岗位招呼模板：您好，我有 LangGraph 工作流、RAG 检索、FastAPI 和 Java 业务服务集成经验，项目包含可运行代码与评测方案，期待进一步沟通。","metadata":{"channel":"boss","role":"agent"}}
+{"kb":"greeting_template","doc_id":"greet-email-referral","text":"内推邮件模板：简要说明目标岗位、最相关的两项项目能力、仓库或演示链接，并邀请对方在方便时查看简历，避免泛化和过度承诺。","metadata":{"channel":"email","scene":"referral"}}
+{"kb":"greeting_template","doc_id":"greet-follow-up","text":"招聘沟通跟进模板：礼貌确认对方是否方便查看简历，补充与岗位最匹配的一项可验证成果，不重复发送长篇自我介绍。","metadata":{"channel":"boss","scene":"follow_up"}}

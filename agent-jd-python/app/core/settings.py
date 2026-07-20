@@ -18,10 +18,12 @@ class Settings(BaseSettings):
     openai_timeout_seconds: float = 180.0
     dashscope_api_key: str | None = None
     dashscope_model: str = "qwen-plus"
-    embedding_provider: str = "hash"
-    embedding_model: str = "text-embedding-3-small"
+    embedding_provider: str = "sentence_transformers"
+    embedding_model: str = "BAAI/bge-small-zh-v1.5"
+    embedding_dimension: int = 512
     faiss_dir: Path = Path("./data/faiss_index")
     prompt_dir: Path = Path("./app/prompts/templates")
+    rag_rrf_k: int = 60
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

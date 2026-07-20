@@ -6,6 +6,7 @@ import faiss
 import numpy as np
 
 from app.rag.embedding_api import EmbeddingProvider, HashEmbeddingProvider
+from app.rag.bm25 import Bm25Index
 from app.rag.schema import RagChunk, RagHit
 
 
@@ -36,6 +37,7 @@ class FaissStore:
         return self._add_normalized(normalized, embeddings)
 
     def _add_normalized(self, normalized: list[dict[str, Any]], embeddings: np.ndarray) -> list[int]:
+        self._remove_replaced_documents(normalized)
         start_id = max(self.meta.keys(), default=0) + 1
         ids = np.array([start_id + i for i in range(len(normalized))], dtype="int64")
         self.index.add_with_ids(embeddings, ids)
@@ -55,6 +57,30 @@ class FaissStore:
             return []
         q = await self.embedder.aembed([query])
         return self._search_by_vector(q, top_k=top_k, filters=filters)
+
+    def lexical_search(self, query: str, top_k: int = 5, filters: dict[str, Any] | None = None) -> list[RagHit]:
+        rows = [
+            (vector_id, item)
+            for vector_id, item in sorted(self.meta.items())
+            if self._match_filters(item.get("metadata", {}), filters)
+        ]
+        if not rows:
+            return []
+        index = Bm25Index([item.get("text", "") for _, item in rows])
+        results = []
+        for row_index, score in index.search(query, top_k=top_k):
+            vector_id, item = rows[row_index]
+            results.append(
+                RagHit(
+                    kb=item.get("kb", self.name),
+                    doc_id=item.get("doc_id", str(vector_id)),
+                    chunk_id=item.get("chunk_id", str(vector_id)),
+                    text=item.get("text", ""),
+                    score=score,
+                    metadata={**item.get("metadata", {}), "bm25_score": score},
+                )
+            )
+        return results
 
     def _search_by_vector(self, q: np.ndarray, top_k: int, filters: dict[str, Any] | None = None) -> list[RagHit]:
         fetch_k = min(max(top_k * 4, top_k), self.index.ntotal)
@@ -92,6 +118,24 @@ class FaissStore:
         if self.meta_path.exists():
             raw = json.loads(self.meta_path.read_text(encoding="utf-8"))
             self.meta = {int(k): v for k, v in raw.items()}
+        if self.index.d != self.embedder.dim:
+            raise ValueError(
+                f"FAISS index dimension mismatch for {self.name}: index={self.index.d}, embedder={self.embedder.dim}. "
+                "Rebuild the index after changing EMBEDDING_MODEL."
+            )
+
+    def _remove_replaced_documents(self, normalized: list[dict[str, Any]]) -> None:
+        document_keys = {(item.get("kb", self.name), item.get("doc_id", "")) for item in normalized}
+        replaced_ids = [
+            vector_id
+            for vector_id, item in self.meta.items()
+            if (item.get("kb", self.name), item.get("doc_id", "")) in document_keys
+        ]
+        if not replaced_ids:
+            return
+        self.index.remove_ids(np.asarray(replaced_ids, dtype="int64"))
+        for vector_id in replaced_ids:
+            self.meta.pop(vector_id, None)
 
     def _normalize_chunk(self, chunk: RagChunk | dict[str, Any]) -> dict[str, Any]:
         if isinstance(chunk, RagChunk):

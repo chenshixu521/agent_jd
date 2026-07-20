@@ -59,20 +59,26 @@ class RagService:
         return await self.store(kb).asearch(query, top_k=top_k, filters=filters)
 
     def search_multi(self, query: str, kbs: list[str], top_k: int = 5, filters: dict[str, Any] | None = None) -> list[RagHit]:
-        hits: list[RagHit] = []
-        per_kb = max(top_k, 3)
+        vector_hits: list[RagHit] = []
+        lexical_hits: list[RagHit] = []
+        per_kb = max(top_k * 2, 6)
         for kb in kbs:
-            hits.extend(self.search(query, kb=kb, top_k=per_kb, filters=filters))
-        hits.sort(key=lambda item: item.score, reverse=True)
-        return self._dedup(hits)[:top_k]
+            vector_hits.extend(self.search(query, kb=kb, top_k=per_kb, filters=filters))
+            lexical_hits.extend(self.store(kb).lexical_search(query, top_k=per_kb, filters=filters))
+        vector_hits.sort(key=lambda item: item.score, reverse=True)
+        lexical_hits.sort(key=lambda item: item.score, reverse=True)
+        return self._rrf_fuse(vector_hits, lexical_hits, top_k=top_k)
 
     async def asearch_multi(self, query: str, kbs: list[str], top_k: int = 5, filters: dict[str, Any] | None = None) -> list[RagHit]:
-        hits: list[RagHit] = []
-        per_kb = max(top_k, 3)
+        vector_hits: list[RagHit] = []
+        lexical_hits: list[RagHit] = []
+        per_kb = max(top_k * 2, 6)
         for kb in kbs:
-            hits.extend(await self.asearch(query, kb=kb, top_k=per_kb, filters=filters))
-        hits.sort(key=lambda item: item.score, reverse=True)
-        return self._dedup(hits)[:top_k]
+            vector_hits.extend(await self.asearch(query, kb=kb, top_k=per_kb, filters=filters))
+            lexical_hits.extend(self.store(kb).lexical_search(query, top_k=per_kb, filters=filters))
+        vector_hits.sort(key=lambda item: item.score, reverse=True)
+        lexical_hits.sort(key=lambda item: item.score, reverse=True)
+        return self._rrf_fuse(vector_hits, lexical_hits, top_k=top_k)
 
     def recall_for_job(self, query: str, top_k: int = 5) -> list[RagHit]:
         return self.search_multi(query, ["jd", "skill_keyword", "interview_question"], top_k=top_k)
@@ -109,6 +115,40 @@ class RagService:
             seen.add(key)
             result.append(hit)
         return result
+
+    def _rrf_fuse(self, vector_hits: list[RagHit], lexical_hits: list[RagHit], top_k: int) -> list[RagHit]:
+        rrf_k = max(1, settings.rag_rrf_k)
+        records: dict[tuple[str, str, str], dict[str, Any]] = {}
+        for source, hits in (("vector", vector_hits), ("bm25", lexical_hits)):
+            for rank, hit in enumerate(hits, start=1):
+                key = (hit.kb, hit.doc_id, hit.chunk_id)
+                record = records.setdefault(key, {"hit": hit, "score": 0.0, "ranks": {}, "scores": {}})
+                record["score"] += 1.0 / (rrf_k + rank)
+                record["ranks"][source] = rank
+                record["scores"][source] = hit.score
+
+        theoretical_max = 2.0 / (rrf_k + 1)
+        fused = []
+        for record in records.values():
+            hit: RagHit = record["hit"]
+            score = record["score"] / theoretical_max
+            fused.append(
+                RagHit(
+                    kb=hit.kb,
+                    doc_id=hit.doc_id,
+                    chunk_id=hit.chunk_id,
+                    text=hit.text,
+                    score=round(score, 6),
+                    metadata={
+                        **hit.metadata,
+                        "retrieval": "rrf_hybrid",
+                        "retrieval_ranks": record["ranks"],
+                        "retrieval_scores": record["scores"],
+                    },
+                )
+            )
+        fused.sort(key=lambda item: item.score, reverse=True)
+        return self._dedup(fused)[:top_k]
 
 
 _default_service: RagService | None = None

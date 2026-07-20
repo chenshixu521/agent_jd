@@ -7,7 +7,7 @@ class PromptEnhancer:
             return "【RAG检索上下文】\n暂无可用知识库上下文。\n"
         lines = ["【RAG检索上下文】", f"用户查询：{query}", ""]
         for index, hit in enumerate(hits, start=1):
-            lines.append(f"[{index}] 知识库: {hit.kb} | 文档: {hit.doc_id} | 相似度: {hit.score:.4f}")
+            lines.append(f"[{index}] 知识库: {hit.kb} | 文档: {hit.doc_id} | 相关度: {hit.score:.4f}")
             lines.append(hit.text)
             if hit.metadata:
                 lines.append(f"元数据: {hit.metadata}")

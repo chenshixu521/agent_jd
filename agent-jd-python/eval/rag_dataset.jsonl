@@ -1,0 +1,14 @@
+{"query":"Java 后端岗位要求 Spring Boot MySQL Redis 和接口性能优化","kbs":["jd"],"relevant_doc_ids":["jd-java-backend"]}
+{"query":"高并发微服务需要消息队列和缓存一致性经验","kbs":["jd","skill_keyword"],"relevant_doc_ids":["jd-java-distributed","skill-distributed"]}
+{"query":"招聘会 LangGraph RAG Prompt 工程的大模型应用开发","kbs":["jd"],"relevant_doc_ids":["jd-ai-agent-engineer"]}
+{"query":"向量召回 BM25 重排和 Recall@K 评测岗位","kbs":["jd","skill_keyword"],"relevant_doc_ids":["jd-rag-engineer","skill-rag"]}
+{"query":"如何用条件边和有限重试设计 LangGraph 工作流","kbs":["project_template","skill_keyword","interview_question"],"relevant_doc_ids":["tpl-langgraph-workflow","skill-agent","interview-langgraph"]}
+{"query":"RAG 双路召回后使用 RRF 融合并返回引用","kbs":["project_template","skill_keyword"],"relevant_doc_ids":["tpl-rag-hybrid","skill-rag"]}
+{"query":"构建查询集计算 Recall@3 MRR NDCG","kbs":["project_template","interview_question"],"relevant_doc_ids":["tpl-rag-evaluation","interview-rag-eval"]}
+{"query":"Redis Stream Worker 幂等 ACK 重试死信队列","kbs":["project_template","interview_question"],"relevant_doc_ids":["tpl-async-task","interview-async-task"]}
+{"query":"traceId 贯穿 Java Python LLM 并统计 Token 和节点耗时","kbs":["project_template"],"relevant_doc_ids":["tpl-observability"]}
+{"query":"上传 PDF DOCX 时进行魔数校验和大小限制","kbs":["project_template","skill_keyword"],"relevant_doc_ids":["tpl-file-processing","skill-security"]}
+{"query":"如何防御检索文档中的 Prompt Injection","kbs":["interview_question","skill_keyword"],"relevant_doc_ids":["interview-prompt-injection","skill-security"]}
+{"query":"通过上下文裁剪 Prompt 缓存和模型路由降低成本","kbs":["interview_question"],"relevant_doc_ids":["interview-llm-cost"]}
+{"query":"给招聘者发送 Agent 岗位开场白，突出 LangGraph 和 RAG 项目","kbs":["greeting_template"],"relevant_doc_ids":["greet-boss-agent"]}
+{"query":"内推邮件应该简要附上项目仓库和匹配能力","kbs":["greeting_template"],"relevant_doc_ids":["greet-email-referral"]}
