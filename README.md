@@ -1,113 +1,146 @@
-# AI 求职 Agent 平台 (agent-jd)
+# AI 求职 Agent 平台（agent-jd）
 
-> 一个基于 **Spring Boot + LangGraph** 的企业级 AI 求职智能体平台。
->
-> **Java 主业务后端** 负责用户、简历、JD、任务、文件、权限等核心业务能力;
-> **Python Agent 服务** 负责 Prompt、RAG、Agent 工作流、大模型推理等智能能力;
-> 前端使用 **Vue3 + Element Plus + Axios** 提供交互界面。
+一个面向求职场景的全栈 AI 应用原型。项目使用 Spring Boot 管理用户、简历、JD、文件、会话和 AI 任务，使用 FastAPI + LangGraph 承载大模型工作流，前端使用 Vue 3 提供完整交互页面。
 
----
+> 当前版本定位为可运行、可评测的个人项目。生产级任务队列、SSE、容器化全量部署和可观测性仍在 Roadmap 中，不作为已完成功能描述。
 
-## 一、核心能力
+## 已实现能力
 
-| 能力 | 说明 |
+| 能力 | 当前实现 |
 | --- | --- |
-| AI 简历优化 | 基于岗位 JD 与用户简历,生成结构化优化建议与重写后的简历 |
-| 岗位 JD 分析 | 解析 JD 中的硬性技能、软性技能、加分项、隐藏诉求 |
-| AI 项目改写 | 针对项目经验,按 STAR 法则 + 岗位需求重写 |
-| AI 打招呼生成 | 个性化打招呼文案 (Boss、猎聘、内推等场景) |
-| 岗位匹配分析 | 简历 vs JD 匹配度评分、缺口分析、补强建议 |
+| 简历优化 | 简历/JD 输入校验、结构化解析、匹配分析、RAG 增强、建议生成与输出校验 |
+| JD 分析 | 技能关键词、软技能、加分项和岗位方向提取 |
+| 项目改写 | 根据目标 JD 与知识库参考生成 STAR 描述和简历 bullet |
+| 岗位匹配 | 规则初算 + LLM 结构化分析，输出匹配项、缺口、优势和风险 |
+| 多轮对话 | Redis 会话上下文、上下文窗口裁剪和 Prompt 缓存 |
+| 文档处理 | PDF、DOCX、TXT 上传与文本提取 |
+| RAG | 多知识库切分、中文 Embedding、FAISS 向量召回、BM25 召回和 RRF 融合 |
 
----
+## 技术栈
 
-## 二、技术栈
+- Java：Java 17、Spring Boot 3、MyBatis-Plus、MySQL、Redis、JWT、WebClient
+- Python：Python 3.11、FastAPI、LangGraph、Pydantic、FAISS、sentence-transformers
+- 前端：Vue 3、TypeScript、Vite、Element Plus、Pinia、Axios
+- 本地基础设施：Docker Compose、MySQL 8、Redis 7
 
-### 1. Java 主业务后端
-- Java 17、Spring Boot 3.x、Spring MVC
-- MyBatis-Plus、MySQL 8、Redis 7
-- Sa-Token / JWT、Knife4j (OpenAPI)
-- WebClient / OpenFeign (调用 Python Agent)
+## 核心链路
 
-### 2. Python Agent 服务
-- Python 3.11、FastAPI、Uvicorn
-- LangChain、**LangGraph** (Agent 工作流编排)
-- OpenAI API / 通义千问 API (可切换)
-- FAISS (向量检索)、sentence-transformers / bge-m3 (Embedding)
-- Pydantic v2、loguru
-
-### 3. 前端
-- Vue3 + Vite、Element Plus、Pinia、Axios、TypeScript
-- 工程目录: `agent-jd-web`
-
-### 4. 基础设施
-- Docker、Docker Compose、Nginx
-- (可选) Prometheus + Grafana、ELK、SkyWalking
-
----
-
-## 三、文档索引
-
-所有架构设计文档位于 `docs/` 目录:
-
-| 文档 | 内容 |
-| --- | --- |
-| [`docs/01-architecture.md`](docs/01-architecture.md) | 系统整体架构、调用流程、数据流 |
-| [`docs/02-java-backend.md`](docs/02-java-backend.md) | Java 主业务后端架构与模块划分 |
-| [`docs/03-python-agent.md`](docs/03-python-agent.md) | Python Agent 服务架构、Agent 工作流、Prompt 管理 |
-| [`docs/04-storage-design.md`](docs/04-storage-design.md) | MySQL / Redis / FAISS 设计 |
-| [`docs/05-deployment.md`](docs/05-deployment.md) | Docker 部署架构、工程化、CI/CD |
-| [`docs/06-directory.md`](docs/06-directory.md) | 企业级目录结构 |
-
----
-
-## 四、目录结构 (顶层)
-
+```text
+简历 + JD
+    ↓
+输入完整性校验 ── 信息不足 ──> 返回澄清问题
+    ↓
+简历/JD 结构化解析
+    ↓
+FAISS 向量召回 + BM25 关键词召回 + RRF 融合
+    ↓
+岗位匹配分析
+    ↓
+简历优化建议生成
+    ↓
+事实与格式校验 ── 不通过 ──> 携带反馈有限重试
+    ↓
+结构化结果 + RAG 来源
 ```
+
+## 目录结构
+
+```text
 agent-jd/
-├── docs/                       # 架构与设计文档
-├── agent-jd-java/              # Java 主业务后端 (Maven 多模块)
-├── agent-jd-python/            # Python Agent 服务
-├── agent-jd-web/               # Vue3 前端
-├── deploy/                     # 部署相关
-│   ├── docker/                 # Dockerfile
-│   ├── docker-compose/         # docker-compose 编排
-│   ├── nginx/                  # 网关配置
-│   └── sql/                    # 初始化 SQL
-├── .github/                    # CI/CD (或 .gitlab-ci.yml)
-└── README.md
+├── agent-jd-java/              # Spring Boot 业务后端
+├── agent-jd-python/            # FastAPI + LangGraph Agent 服务
+│   ├── app/                    # 应用代码
+│   ├── eval/                   # RAG / Agent 评测数据
+│   ├── scripts/                # 导入与评测脚本
+│   └── seed/                   # 示例知识库
+├── agent-jd-web/               # Vue 3 前端
+├── deploy/
+│   ├── docker-compose/         # 本地基础设施
+│   └── sql/                    # MySQL 初始化 SQL
+└── docs/                       # 设计文档（包含部分 Roadmap 方案）
 ```
 
-完整目录结构详见 [`docs/06-directory.md`](docs/06-directory.md)。
+## 快速启动
 
----
-
-## 五、快速启动 (开发环境)
+### 1. 启动 MySQL 与 Redis
 
 ```bash
-# 1. 启动基础设施 (MySQL + Redis)
 docker compose -f deploy/docker-compose/infra.yml up -d
-
-# 2. 启动 Python Agent 服务
-cd agent-jd-python
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8000
-
-# 3. 启动 Java 后端
-cd agent-jd-java
-./mvnw spring-boot:run -pl agent-jd-admin
-
-# 4. 启动前端
-cd agent-jd-web
-pnpm install && pnpm dev
 ```
 
----
+默认连接信息：
 
-## 六、设计原则
+- MySQL：`localhost:3306/agent_jd`，用户 `root`，密码 `agent_jd`
+- Redis：`localhost:6379`，无密码
 
-- **模块解耦**:Java 业务域与 Python AI 域强隔离,通过 HTTP/gRPC 通信
-- **能力可插拔**:大模型、Embedding、向量库均通过抽象接口注入,可一键替换
-- **Prompt 与代码分离**:Prompt 由 YAML/Jinja2 模板管理,支持版本与灰度
-- **任务异步化**:所有 AI 任务走异步队列,Java 通过 task_id 轮询/SSE 拉结果
-- **可观测性优先**:统一 traceId 贯穿 Java → Python → LLM 调用链
+### 2. 启动 Python Agent
 
+```bash
+cd agent-jd-python
+cp .env.example .env
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt -r requirements-embedding.txt
+python -m scripts.import_knowledge
+uvicorn app.main:app --reload --port 8000
+```
+
+调用真实大模型前，需要在 `.env` 中设置对应 API Key。中文 Embedding 依赖被单独放在 `requirements-embedding.txt`，避免基础测试环境安装 CUDA 版本 PyTorch；模型首次运行时会从 Hugging Face 下载。
+
+### 3. 启动 Java 后端
+
+```bash
+cd agent-jd-java
+cp .env.example .env
+set -a && source .env && set +a
+mvn spring-boot:run
+```
+
+### 4. 启动前端
+
+```bash
+cd agent-jd-web
+npm install
+npm run dev
+```
+
+访问：<http://localhost:5173>
+
+## RAG 评测
+
+```bash
+cd agent-jd-python
+python -m scripts.eval_rag --provider hash
+python -m scripts.eval_rag --provider sentence_transformers
+```
+
+评测脚本输出 Recall@3、Recall@5 和 MRR。`hash` 用于快速回归测试，`sentence_transformers` 用于验证实际中文语义召回效果。
+
+## 测试
+
+```bash
+# Python
+cd agent-jd-python && pip install -r requirements-dev.txt && pytest
+
+# Java（需要 Java 17、MySQL 和 Redis）
+cd agent-jd-java && mvn test
+
+# Web
+cd agent-jd-web && npm run build
+```
+
+## 当前边界
+
+- Java AI 任务目前使用进程内异步执行和前端轮询，不具备服务重启后的可靠恢复能力。
+- Agent 工作流已支持简历优化场景的条件路由和有限重试，其他能力仍以固定工作流为主。
+- FAISS 索引适合单机演示；多实例并发写和生产级索引管理尚未实现。
+- `docs/` 中关于 Redis Stream、SSE、MinIO、Kubernetes、监控和 CI/CD 的内容属于演进设计，不代表当前均已落地。
+
+## Roadmap
+
+- [ ] Redis Stream / RabbitMQ 可靠任务队列与幂等消费
+- [ ] SSE 流式进度、断线重连和事件回放
+- [ ] Reranker、离线评测报告和答案忠实度评测
+- [ ] PII 脱敏、Prompt Injection 防护、调用配额与审计
+- [ ] Java/Python/Web 全量 Dockerfile 与 GitHub Actions
+- [ ] LangGraph Checkpoint、Human-in-the-loop 和更多条件路由
