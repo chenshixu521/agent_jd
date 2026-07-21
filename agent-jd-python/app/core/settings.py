@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     openai_timeout_seconds: float = 180.0
     dashscope_api_key: str | None = None
     dashscope_model: str = "qwen-plus"
+    fake_llm_delay_ms: int = 0
     embedding_provider: str = "sentence_transformers"
     embedding_model: str = "BAAI/bge-small-zh-v1.5"
     embedding_dimension: int = 512

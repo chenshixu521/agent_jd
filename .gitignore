@@ -20,6 +20,8 @@ node_modules/
 dist/
 agent-jd-web/node_modules/
 agent-jd-web/dist/
+agent-jd-web/playwright-report/
+agent-jd-web/test-results/
 
 # IDE
 .idea/
