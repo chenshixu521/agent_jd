@@ -1,0 +1,20 @@
+{"query":"找需要 Spring Boot、缓存和消息系统经验的业务后端岗位","kbs":["jd"],"relevant_doc_ids":["heldout-java-platform"]}
+{"query":"熟悉 MySQL Redis，能做接口调优和线上问题排查的 Java 职位","kbs":["jd"],"relevant_doc_ids":["heldout-java-platform"]}
+{"query":"招聘场景里用状态图编排模型工具并校验 JSON 输出","kbs":["jd"],"relevant_doc_ids":["heldout-ai-workflow"]}
+{"query":"FastAPI 接入大模型，工作流需要条件路由和自动评测","kbs":["jd"],"relevant_doc_ids":["heldout-ai-workflow"]}
+{"query":"中文向量和关键词双路召回后用 RRF 合并排名","kbs":["jd"],"relevant_doc_ids":["heldout-rag-quality"]}
+{"query":"关注检索 Recall MRR nDCG 以及答案引用是否准确的岗位","kbs":["jd"],"relevant_doc_ids":["heldout-rag-quality"]}
+{"query":"开发 Python 异步接口，使用 Pydantic Redis 和 pytest","kbs":["jd"],"relevant_doc_ids":["heldout-python-service"]}
+{"query":"模型服务需要 asyncio 并发和 API 异常定位能力","kbs":["jd"],"relevant_doc_ids":["heldout-python-service"]}
+{"query":"Vue3 管理后台，包含复杂表单、Pinia 状态和组件库","kbs":["jd"],"relevant_doc_ids":["heldout-frontend-console"]}
+{"query":"TypeScript 与 Vite 技术栈的运营控制台开发","kbs":["jd"],"relevant_doc_ids":["heldout-frontend-console"]}
+{"query":"负责容器镜像、Kubernetes 发布和持续集成流水线","kbs":["jd"],"relevant_doc_ids":["heldout-cloud-native"]}
+{"query":"容器化部署并用 Prometheus Grafana 监控服务运行","kbs":["jd"],"relevant_doc_ids":["heldout-cloud-native","heldout-observability-cost"]}
+{"query":"MinIO 文件接入后解析 PDF DOCX 并建立索引","kbs":["jd"],"relevant_doc_ids":["heldout-document-pipeline"]}
+{"query":"文档解析和切分任务通过 Kafka 异步执行并支持失败重试","kbs":["jd"],"relevant_doc_ids":["heldout-document-pipeline"]}
+{"query":"防御提示词注入并对个人敏感信息做脱敏审计","kbs":["jd"],"relevant_doc_ids":["heldout-security-governance"]}
+{"query":"大模型工具调用遵循最小权限，敏感操作要确认和限流","kbs":["jd"],"relevant_doc_ids":["heldout-security-governance"]}
+{"query":"Redis Stream 的 Pending 消息如何认领、ACK 和进入 DLQ","kbs":["jd"],"relevant_doc_ids":["heldout-reliable-task"]}
+{"query":"至少一次消费下保证任务幂等、重试和数据库补偿恢复","kbs":["jd"],"relevant_doc_ids":["heldout-reliable-task"]}
+{"query":"traceId 贯穿 Java Python LLM，并统计 Token 成本和延迟","kbs":["jd"],"relevant_doc_ids":["heldout-observability-cost"]}
+{"query":"既要观察任务重试死信，也要统计模型调用成功率","kbs":["jd"],"relevant_doc_ids":["heldout-reliable-task","heldout-observability-cost"]}

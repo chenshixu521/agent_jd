@@ -1,0 +1,10 @@
+{"kb":"jd","doc_id":"heldout-java-platform","text":"业务中台后端开发岗位：负责订单与账户服务，要求熟悉 Java、Spring Boot、MySQL、Redis 和 Kafka，能够处理缓存一致性、接口性能与线上故障定位。","metadata":{"role":"java_platform","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-ai-workflow","text":"智能招聘产品 AI 应用岗位：使用 Python、FastAPI 与 LangGraph 编排模型工作流，建设工具调用、结构化输出、状态路由和自动评测能力。","metadata":{"role":"ai_workflow","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-rag-quality","text":"知识检索质量工程岗位：建设中文 Embedding、FAISS 向量召回、BM25 关键词检索与 RRF 融合，使用 Recall、MRR、nDCG 和引用准确性评估效果。","metadata":{"role":"rag_quality","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-python-service","text":"模型服务后端岗位：基于 Python、FastAPI、asyncio、Pydantic 和 Redis 开发异步 API，要求具备 pytest 自动测试与服务异常排查经验。","metadata":{"role":"python_service","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-frontend-console","text":"运营控制台前端岗位：使用 Vue3、TypeScript、Vite、Pinia 和 Element Plus 开发复杂表单、状态管理与接口联调功能。","metadata":{"role":"frontend_console","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-cloud-native","text":"云原生平台工程岗位：负责 Docker 镜像、Kubernetes 部署和 CI 流水线，使用 Prometheus 与 Grafana 建设服务监控和可视化看板。","metadata":{"role":"cloud_native","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-document-pipeline","text":"企业文档处理岗位：使用 MinIO 管理文件，借助 Apache Tika 解析 PDF、DOCX 与 TXT，通过 Kafka 异步执行切分、索引和失败重试。","metadata":{"role":"document_pipeline","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-security-governance","text":"大模型安全治理岗位：关注 Prompt Injection、PII 脱敏、RBAC、审计日志与接口限流，要求落实最小权限和敏感操作确认。","metadata":{"role":"ai_security","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-reliable-task","text":"异步任务平台岗位：基于 Redis Stream 消费组处理任务，覆盖 ACK、Pending 认领、幂等、有限重试、死信队列和数据库恢复扫描。","metadata":{"role":"reliable_task","split":"heldout"}}
+{"kb":"jd","doc_id":"heldout-observability-cost","text":"AI 服务可观测性岗位：使用 traceId 串联 Java、Python 与模型调用，采集请求耗时、成功率、Token 和成本指标并构建告警依据。","metadata":{"role":"ai_observability","split":"heldout"}}

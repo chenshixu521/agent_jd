@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-07-21T12:02:37+00:00",
+  "datasets": {
+    "retrieval_corpus": {
+      "path": "eval/heldout_knowledge.jsonl",
+      "documents": 10
+    },
+    "retrieval_queries": {
+      "path": "eval/heldout_rag_dataset.jsonl",
+      "queries": 20
+    },
+    "structured_match": {
+      "path": "eval/agent_match_dataset.jsonl",
+      "cases": 20
+    }
+  },
+  "retrieval": [
+    {
+      "queries": 20,
+      "recall_at_3": 0.55,
+      "recall_at_5": 0.65,
+      "mrr": 0.4867,
+      "ndcg_at_5": 0.5228,
+      "provider": "hash",
+      "model": "hash-baseline",
+      "mode": "vector"
+    },
+    {
+      "queries": 20,
+      "recall_at_3": 0.85,
+      "recall_at_5": 0.95,
+      "mrr": 0.7058,
+      "ndcg_at_5": 0.7671,
+      "provider": "hash",
+      "model": "hash-baseline",
+      "mode": "hybrid"
+    },
+    {
+      "queries": 20,
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_5": 1.0,
+      "provider": "sentence_transformers",
+      "model": "BAAI/bge-small-zh-v1.5",
+      "mode": "vector"
+    },
+    {
+      "queries": 20,
+      "recall_at_3": 1.0,
+      "recall_at_5": 1.0,
+      "mrr": 1.0,
+      "ndcg_at_5": 1.0,
+      "provider": "sentence_transformers",
+      "model": "BAAI/bge-small-zh-v1.5",
+      "mode": "hybrid"
+    }
+  ],
+  "retrieval_comparisons": [
+    {
+      "provider": "hash",
+      "model": "hash-baseline",
+      "hybrid_minus_vector": {
+        "recall_at_3": 0.3,
+        "recall_at_5": 0.3,
+        "mrr": 0.2191,
+        "ndcg_at_5": 0.2443
+      }
+    },
+    {
+      "provider": "sentence_transformers",
+      "model": "BAAI/bge-small-zh-v1.5",
+      "hybrid_minus_vector": {
+        "recall_at_3": 0.0,
+        "recall_at_5": 0.0,
+        "mrr": 0.0,
+        "ndcg_at_5": 0.0
+      }
+    }
+  ],
+  "structured_match": {
+    "cases": 20,
+    "structured_output_success_rate": 1.0,
+    "skill_label_exact_match_rate": 1.0,
+    "grounded_skill_claim_rate": 1.0,
+    "evidence_coverage_rate": 1.0,
+    "provider": "fake",
+    "model": "deterministic"
+  },
+  "limitations": [
+    "The held-out datasets are small, manually constructed, and separate from the runtime seed corpus.",
+    "Hash embedding is a deterministic regression baseline, not a semantic model quality result.",
+    "BGE saturates this small benchmark, so its scores do not establish a hybrid or reranker uplift.",
+    "Structured matching uses a Fake LLM and measures schema, skill labels, and skill evidence only.",
+    "Free-text summaries and suggestions are not covered by the faithfulness metric."
+  ]
+}

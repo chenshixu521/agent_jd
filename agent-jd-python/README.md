@@ -83,11 +83,21 @@ python -m scripts.import_knowledge --file seed/knowledge.jsonl
 运行评测：
 
 ```bash
-python -m scripts.eval_rag --provider hash --details
-python -m scripts.eval_rag --provider sentence_transformers --details
+# 完整快速回归并生成 Markdown/JSON 报告
+python -m scripts.eval_suite
+
+# 同时评测本地中文 Embedding
+python -m scripts.eval_suite --include-bge
+
+# 可选：查看单项逐条结果
+python -m scripts.eval_rag --provider hash --seed eval/heldout_knowledge.jsonl \
+  --dataset eval/heldout_rag_dataset.jsonl --mode hybrid --details
+python -m scripts.eval_agent --details
 ```
 
-评测指标包括 Recall@3、Recall@5 和 MRR。当前数据集属于仓库内开发集，应用于回归和方案对比，不应当作真实线上业务指标。
+统一评测使用与运行时 `seed/` 分离的 10 条岗位语料、20 条人工标注查询和 20 组简历/JD 样本。检索指标包括 Recall@3、Recall@5、MRR 和 nDCG@5，并对比 vector-only 与 BM25 + RRF hybrid；匹配指标包括结构化输出成功率、技能标签完全一致率、技能主张忠实度和证据覆盖率。结果写入 [reports/evaluation.md](reports/evaluation.md) 与 [reports/evaluation.json](reports/evaluation.json)。
+
+独立集规模较小，仅用于可复现的本地方案对比。当前 BGE 在 vector-only 和 hybrid 两种模式下均已达到四项指标 1.0，无法证明 hybrid 或 Reranker 的额外收益。Fake LLM 评测覆盖真实 Prompt 调用、规则初算和 Pydantic 契约，但不代表真实模型效果；忠实度指标只覆盖结构化技能和证据字段，不评价自由文本总结与建议。
 
 ## 请求契约
 

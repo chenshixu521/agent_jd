@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from math import log2
 from typing import Any, Protocol
 
 from app.rag.schema import RagHit
@@ -17,11 +18,19 @@ class RetrievalCase:
 
 def evaluate_retrieval(service: SearchService, cases: list[RetrievalCase]) -> dict[str, Any]:
     if not cases:
-        return {"queries": 0, "recall_at_3": 0.0, "recall_at_5": 0.0, "mrr": 0.0, "details": []}
+        return {
+            "queries": 0,
+            "recall_at_3": 0.0,
+            "recall_at_5": 0.0,
+            "mrr": 0.0,
+            "ndcg_at_5": 0.0,
+            "details": [],
+        }
 
     recall_at_3 = 0.0
     recall_at_5 = 0.0
     reciprocal_rank = 0.0
+    ndcg_at_5 = 0.0
     details = []
     for case in cases:
         hits = service.search_multi(case.query, kbs=case.kbs, top_k=5)
@@ -29,9 +38,11 @@ def evaluate_retrieval(service: SearchService, cases: list[RetrievalCase]) -> di
         recall3 = _recall(retrieved[:3], case.relevant_doc_ids)
         recall5 = _recall(retrieved[:5], case.relevant_doc_ids)
         rr = _reciprocal_rank(retrieved, case.relevant_doc_ids)
+        ndcg5 = _ndcg(retrieved, case.relevant_doc_ids, 5)
         recall_at_3 += recall3
         recall_at_5 += recall5
         reciprocal_rank += rr
+        ndcg_at_5 += ndcg5
         details.append(
             {
                 "query": case.query,
@@ -40,6 +51,7 @@ def evaluate_retrieval(service: SearchService, cases: list[RetrievalCase]) -> di
                 "recall_at_3": round(recall3, 4),
                 "recall_at_5": round(recall5, 4),
                 "reciprocal_rank": round(rr, 4),
+                "ndcg_at_5": round(ndcg5, 4),
             }
         )
 
@@ -49,6 +61,7 @@ def evaluate_retrieval(service: SearchService, cases: list[RetrievalCase]) -> di
         "recall_at_3": round(recall_at_3 / size, 4),
         "recall_at_5": round(recall_at_5 / size, 4),
         "mrr": round(reciprocal_rank / size, 4),
+        "ndcg_at_5": round(ndcg_at_5 / size, 4),
         "details": details,
     }
 
@@ -73,3 +86,12 @@ def _reciprocal_rank(retrieved: list[str], relevant: set[str]) -> float:
         if doc_id in relevant:
             return 1.0 / rank
     return 0.0
+
+
+def _ndcg(retrieved: list[str], relevant: set[str], top_k: int) -> float:
+    if not relevant:
+        return 0.0
+    dcg = sum(1.0 / log2(rank + 1) for rank, doc_id in enumerate(retrieved[:top_k], start=1) if doc_id in relevant)
+    ideal_hits = min(len(relevant), top_k)
+    ideal_dcg = sum(1.0 / log2(rank + 1) for rank in range(1, ideal_hits + 1))
+    return dcg / ideal_dcg if ideal_dcg else 0.0

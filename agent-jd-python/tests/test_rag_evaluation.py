@@ -19,3 +19,4 @@ def test_evaluate_retrieval_calculates_recall_and_mrr():
     assert result["recall_at_3"] == 1.0
     assert result["recall_at_5"] == 1.0
     assert result["mrr"] == 0.5
+    assert result["ndcg_at_5"] == 0.6309

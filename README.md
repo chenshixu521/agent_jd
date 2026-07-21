@@ -147,11 +147,19 @@ npm run dev
 
 ```bash
 cd agent-jd-python
-python -m scripts.eval_rag --provider hash
-python -m scripts.eval_rag --provider sentence_transformers
+
+# 无模型下载：Hash vector/hybrid 对照 + Fake LLM 结构化匹配评测
+python -m scripts.eval_suite
+
+# 增加 BAAI/bge-small-zh-v1.5 vector/hybrid 对照
+python -m scripts.eval_suite --include-bge
 ```
 
-评测脚本输出 Recall@3、Recall@5 和 MRR。`hash` 用于快速回归测试，`sentence_transformers` 用于验证实际中文语义召回效果。
+统一脚本基于与运行时 `seed/` 分离的 10 条岗位语料、20 条人工标注查询和 20 组简历/JD 样本，生成 [Markdown 报告](agent-jd-python/reports/evaluation.md) 与 [JSON 结果](agent-jd-python/reports/evaluation.json)。检索侧对比 vector-only 与 BM25 + RRF hybrid，输出 Recall@3、Recall@5、MRR 和 nDCG@5；匹配侧验证真实 Prompt 调用链、Pydantic 输出约束、技能标签与技能证据。
+
+当前提交基线中，Hash hybrid 相比 vector-only 的 Recall@3 从 0.55 提升到 0.85、MRR 从 0.4867 提升到 0.7058；BGE 在该小型数据集的两种模式下四项指标均为 1.0，未体现 hybrid 增益。因此结果只支持“建立了可复现的评测与对照”，不支持泛化为线上效果或 RRF 对语义模型的必然提升。
+
+Hash 与 Fake LLM 用于确定性回归，不代表真实模型质量；技能主张忠实度也不覆盖自由文本总结和建议。单项逐条结果可通过 `scripts.eval_rag --details` 和 `scripts.eval_agent --details` 查看。
 
 ## 测试
 
@@ -216,7 +224,8 @@ LOAD_USERS=10 LOAD_DURATION=60s FAKE_LLM_DELAY_MS=100 ./scripts/run-load-test.sh
 
 - [x] Redis Stream 可靠任务队列、幂等消费、自动重试与死信队列
 - [ ] SSE 流式进度、断线重连和事件回放
-- [ ] Reranker、离线评测报告和答案忠实度评测
+- [x] 独立检索集、vector/hybrid 对照与结构化匹配评测报告
+- [ ] Reranker 对照与自由文本答案忠实度评测
 - [ ] PII 脱敏、Prompt Injection 防护、调用配额与审计
 - [x] Java/Python/Web Dockerfile 与 Docker Compose 一键部署
 - [x] GitHub Actions 自动测试、确定性 Compose E2E 与镜像构建

@@ -1,0 +1,20 @@
+{"id":"match-java-core","resume_text":"使用 Java、Spring Boot、MySQL 和 Redis 开发后端服务。","jd_text":"岗位要求 Java、Spring Boot、MySQL、Redis 和 Kafka。","expected_matched_skills":["Java","Spring Boot","MySQL","Redis"],"expected_missing_skills":["Kafka"]}
+{"id":"match-python-agent","resume_text":"使用 Python 和 FastAPI 开发模型接口。","jd_text":"要求 Python、FastAPI、LangGraph 与 RAG 项目经验。","expected_matched_skills":["Python","FastAPI"],"expected_missing_skills":["LangGraph","RAG"]}
+{"id":"match-vue-console","resume_text":"使用 Vue3 与 Element Plus 开发管理页面。","jd_text":"前端岗位要求 Vue3、Element Plus 和 Docker。","expected_matched_skills":["Vue3","Element Plus"],"expected_missing_skills":["Docker"]}
+{"id":"match-container","resume_text":"负责 Docker 镜像和 Kubernetes 部署。","jd_text":"平台岗位要求 Docker、Kubernetes 与 Redis。","expected_matched_skills":["Docker","Kubernetes"],"expected_missing_skills":["Redis"]}
+{"id":"match-java-cloud","resume_text":"基于 Java、Spring Cloud 和 Kafka 开发服务。","jd_text":"要求 Java、Spring Cloud、Kafka 和 Redis。","expected_matched_skills":["Java","Spring Cloud","Kafka"],"expected_missing_skills":["Redis"]}
+{"id":"match-llm-framework","resume_text":"接入 LangChain 和 OpenAI 完成模型调用。","jd_text":"要求 LangChain、LangGraph 与 OpenAI 经验。","expected_matched_skills":["LangChain","OpenAI"],"expected_missing_skills":["LangGraph"]}
+{"id":"match-message-queue","resume_text":"使用 RabbitMQ 建设消息队列。","jd_text":"要求掌握 RabbitMQ、RocketMQ 和消息队列设计。","expected_matched_skills":["RabbitMQ","消息队列"],"expected_missing_skills":["RocketMQ"]}
+{"id":"match-mybatis-plus","resume_text":"使用 MyBatis-Plus 和 MySQL 开发数据接口。","jd_text":"要求 MyBatis-Plus、MySQL 与 Redis。","expected_matched_skills":["MyBatis","MyBatis-Plus","MySQL"],"expected_missing_skills":["Redis"]}
+{"id":"match-distributed","resume_text":"参与 Java 微服务和分布式系统开发。","jd_text":"岗位需要 Java、微服务、分布式与 Spring Boot。","expected_matched_skills":["Java","微服务","分布式"],"expected_missing_skills":["Spring Boot"]}
+{"id":"match-rag-stack","resume_text":"使用 Python、FAISS 和 RAG 构建检索服务。","jd_text":"要求 Python、FAISS、RAG 与 FastAPI。","expected_matched_skills":["Python","FAISS","RAG"],"expected_missing_skills":["FastAPI"]}
+{"id":"match-auth-cache","resume_text":"使用 Java、Redis 和 JWT 完成接口鉴权。","jd_text":"岗位要求 Java、Redis、JWT 与 Spring Boot。","expected_matched_skills":["Java","Redis","JWT"],"expected_missing_skills":["Spring Boot"]}
+{"id":"match-dashscope","resume_text":"基于 Python、FastAPI 接入通义模型。","jd_text":"要求 Python、FastAPI、通义与 RAG 经验。","expected_matched_skills":["Python","FastAPI","通义"],"expected_missing_skills":["RAG"]}
+{"id":"match-langgraph-rag","resume_text":"使用 LangGraph 和 RAG 编排问答流程。","jd_text":"岗位要求 LangGraph、RAG 与 OpenAI。","expected_matched_skills":["LangGraph","RAG"],"expected_missing_skills":["OpenAI"]}
+{"id":"match-vue-docker","resume_text":"使用 Vue3 开发页面并通过 Docker 部署。","jd_text":"要求 Vue3、Docker 和 Kubernetes。","expected_matched_skills":["Vue3","Docker"],"expected_missing_skills":["Kubernetes"]}
+{"id":"match-spring-data","resume_text":"使用 Spring Boot 和 MySQL 开发业务系统。","jd_text":"要求 Java、Spring Boot、MySQL 与 Redis。","expected_matched_skills":["Spring Boot","MySQL"],"expected_missing_skills":["Java","Redis"]}
+{"id":"match-mq-products","resume_text":"使用 Kafka 与 RocketMQ 处理异步任务。","jd_text":"要求 Kafka、RocketMQ 和消息队列设计。","expected_matched_skills":["Kafka","RocketMQ"],"expected_missing_skills":["消息队列"]}
+{"id":"match-mybatis-java","resume_text":"使用 Java 和 MyBatis 完成持久层开发。","jd_text":"岗位要求 Java、MyBatis 与 MySQL。","expected_matched_skills":["Java","MyBatis"],"expected_missing_skills":["MySQL"]}
+{"id":"match-fastapi-cache","resume_text":"使用 FastAPI 和 Redis 开发接口。","jd_text":"要求 Python、FastAPI、Redis 与 Docker。","expected_matched_skills":["FastAPI","Redis"],"expected_missing_skills":["Python","Docker"]}
+{"id":"match-element-plus","resume_text":"使用 Vue3、Element Plus 和 TypeScript 开发前端。","jd_text":"要求 Vue3、Element Plus 与 TypeScript。","expected_matched_skills":["Vue3","Element Plus"],"expected_missing_skills":[]}
+{"id":"match-openai-rag","resume_text":"使用 OpenAI、LangChain 和 RAG 开发问答应用。","jd_text":"岗位要求 OpenAI、LangChain、RAG 与 FAISS。","expected_matched_skills":["OpenAI","LangChain","RAG"],"expected_missing_skills":["FAISS"]}
