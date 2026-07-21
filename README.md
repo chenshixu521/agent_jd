@@ -4,7 +4,7 @@
 
 一个面向求职场景的全栈 AI 应用原型。项目使用 Spring Boot 管理用户、简历、JD、文件、会话和 AI 任务，使用 FastAPI + LangGraph 承载大模型工作流，前端使用 Vue 3 提供完整交互页面。
 
-> 当前版本定位为可运行、可评测的个人项目，支持 Docker Compose 一键启动。生产级任务队列、SSE 和可观测性仍在 Roadmap 中，不作为已完成功能描述。
+> 当前版本定位为可运行、可评测的个人项目，支持 Docker Compose 一键启动。多实例高吞吐任务调度、SSE 和可观测性仍在 Roadmap 中，不作为已完成功能描述。
 
 ## 已实现能力
 
@@ -15,6 +15,7 @@
 | 项目改写 | 根据目标 JD 与知识库参考生成 STAR 描述和简历 bullet |
 | 岗位匹配 | 规则初算 + LLM 结构化分析，输出匹配项、缺口、优势和风险 |
 | 多轮对话 | Redis 会话上下文、上下文窗口裁剪和 Prompt 缓存 |
+| 可靠任务 | Redis Stream 消费组、幂等锁、自动重试、Pending 恢复和死信队列 |
 | 文档处理 | PDF、DOCX、TXT 上传与文本提取 |
 | RAG | 多知识库切分、中文 Embedding、FAISS 向量召回、BM25 召回和 RRF 融合 |
 
@@ -161,16 +162,18 @@ cd agent-jd-web && npm run build
 
 推送到 `main` 或创建 Pull Request 时，GitHub Actions 会自动执行以上检查，并验证 Compose 配置和三个应用镜像的 Docker 构建。
 
+AI 任务提交后先持久化到 MySQL，再写入 Redis Stream。Java Worker 使用消费组处理任务；超时、限流和服务端异常等可重试故障会保留在 Pending 列表中，超过阈值后写入 `ai:task:dlq`，鉴权和参数错误则直接失败。数据库恢复扫描会重新投递未入队的任务，Python Agent 按 `taskId` 复用已完成结果，避免重试重复调用模型。
+
 ## 当前边界
 
-- Java AI 任务目前使用进程内异步执行和前端轮询，不具备服务重启后的可靠恢复能力。
+- AI 任务已支持 Redis Stream 可靠消费与重启恢复，前端进度展示目前仍使用轮询。
 - Agent 工作流已支持简历优化场景的条件路由和有限重试，其他能力仍以固定工作流为主。
 - FAISS 索引适合单机演示；多实例并发写和生产级索引管理尚未实现。
-- `docs/` 中关于 Redis Stream、SSE、MinIO、Kubernetes、监控和 CI/CD 的内容属于演进设计，不代表当前均已落地。
+- `docs/` 中关于 SSE、MinIO、Kubernetes 和监控的内容属于演进设计，不代表当前均已落地。
 
 ## Roadmap
 
-- [ ] Redis Stream / RabbitMQ 可靠任务队列与幂等消费
+- [x] Redis Stream 可靠任务队列、幂等消费、自动重试与死信队列
 - [ ] SSE 流式进度、断线重连和事件回放
 - [ ] Reranker、离线评测报告和答案忠实度评测
 - [ ] PII 脱敏、Prompt Injection 防护、调用配额与审计

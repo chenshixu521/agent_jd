@@ -1,6 +1,11 @@
+import json
+
 from app.agents.graphs import build_resume_optimize_graph
 from app.agents.nodes import validate_advice_node, validate_resume_optimize_input_node
 from app.agents.schemas import build_match_result
+from app.api.schemas.common import AgentRequest
+from app.api.v1.agent import execute
+from app.core.errors import unhandled_error_handler
 
 
 async def test_resume_optimize_requests_clarification_for_incomplete_input(monkeypatch):
@@ -86,3 +91,43 @@ def test_resume_optimize_graph_compiles_with_conditional_routes():
     graph = build_resume_optimize_graph()
 
     assert graph is not None
+
+
+async def test_execute_reuses_completed_task_result(monkeypatch):
+    status_updates = []
+
+    async def cached_context(_task_id):
+        return {
+            "capability": "jd",
+            "action": "analyze",
+            "result": {"keywords": ["Java", "Redis"]},
+        }
+
+    async def record_status(task_id, status, progress, extra=None, ttl=86400):
+        status_updates.append((task_id, status, progress, extra))
+
+    async def fail_if_called(*_args, **_kwargs):
+        raise AssertionError("a completed task must not invoke the agent graph again")
+
+    monkeypatch.setattr("app.api.v1.agent.get_context", cached_context)
+    monkeypatch.setattr("app.api.v1.agent.set_task_status", record_status)
+    monkeypatch.setattr("app.api.v1.agent.run_agent", fail_if_called)
+
+    response = await execute(
+        "jd",
+        "analyze",
+        AgentRequest(task_id="task-1", payload={"jd_text": "Java Redis"}),
+    )
+
+    assert response.data == {"keywords": ["Java", "Redis"]}
+    assert status_updates[0][0:3] == ("task-1", "SUCCESS", 100)
+
+
+async def test_unhandled_error_marks_authentication_failure_as_non_retryable():
+    class AuthenticationFailure(Exception):
+        status_code = 401
+
+    response = await unhandled_error_handler(None, AuthenticationFailure("invalid key"))
+    payload = json.loads(response.body)
+
+    assert payload["error"]["retryable"] is False

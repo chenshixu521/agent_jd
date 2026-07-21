@@ -8,7 +8,7 @@ from app.api.deps import bind_context
 from app.api.schemas.common import AgentRequest, AgentResponse
 from app.core.security import verify_internal_token
 from app.core.tracing import get_trace_id
-from app.infra.redis_client import set_context, set_task_status
+from app.infra.redis_client import get_context, set_context, set_task_status
 
 router = APIRouter(dependencies=[Depends(bind_context), Depends(verify_internal_token)])
 
@@ -16,6 +16,16 @@ router = APIRouter(dependencies=[Depends(bind_context), Depends(verify_internal_
 async def execute(capability: str, action: str, request: AgentRequest) -> AgentResponse:
     task_id = request.task_id or str(uuid4())
     trace_id = get_trace_id()
+    cached = await get_context(task_id)
+    if (
+        cached is not None
+        and cached.get("capability") == capability
+        and cached.get("action") == action
+        and "result" in cached
+    ):
+        await set_task_status(task_id, "SUCCESS", 100, {"capability": capability, "action": action, "trace_id": trace_id})
+        logger.info(f"Agent request cache hit taskId={task_id} capability={capability} action={action} traceId={trace_id}")
+        return AgentResponse(taskId=task_id, data=cached["result"], traceId=trace_id)
     logger.info(f"Agent request start taskId={task_id} capability={capability} action={action} traceId={trace_id}")
     await set_task_status(task_id, "RUNNING", 10, {"capability": capability, "action": action, "trace_id": trace_id})
     try:

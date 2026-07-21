@@ -169,7 +169,10 @@ async def chat_node(state: dict) -> dict:
     store = get_session_store()
     session_id = payload.get("session_id") or payload.get("sessionId")
     if not session_id:
-        session = await store.create_session(title=payload.get("title", "求职 Agent 对话"))
+        session = await store.create_session(
+            title=payload.get("title", "求职 Agent 对话"),
+            session_id=state.get("task_id"),
+        )
         session_id = session.session_id
     question = payload.get("message", "")
     conversation_messages = await store.build_context(session_id)

@@ -43,6 +43,15 @@ async def agent_error_handler(_: Request, exc: AgentError) -> JSONResponse:
 
 
 async def unhandled_error_handler(_: Request, exc: Exception) -> JSONResponse:
+    status_code = getattr(exc, "status_code", None)
+    retryable = status_code in {408, 409, 429} or (isinstance(status_code, int) and status_code >= 500)
+    if status_code is None:
+        retryable = exc.__class__.__name__ in {
+            "APIConnectionError",
+            "APITimeoutError",
+            "RateLimitError",
+            "InternalServerError",
+        }
     return JSONResponse(
         status_code=200,
         content={
@@ -50,7 +59,7 @@ async def unhandled_error_handler(_: Request, exc: Exception) -> JSONResponse:
             "msg": str(exc),
             "success": False,
             "data": None,
-            "error": {"type": exc.__class__.__name__, "message": str(exc), "retryable": True},
+            "error": {"type": exc.__class__.__name__, "message": str(exc), "retryable": retryable},
             "traceId": get_trace_id(),
         },
     )

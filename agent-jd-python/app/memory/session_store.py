@@ -15,9 +15,20 @@ class RedisSessionStore:
         self.message_limit = message_limit
         self.context_policy = context_policy or ContextWindowPolicy()
 
-    async def create_session(self, user_id: str | None = None, title: str = "新会话", metadata: dict[str, Any] | None = None) -> SessionState:
+    async def create_session(
+        self,
+        user_id: str | None = None,
+        title: str = "新会话",
+        metadata: dict[str, Any] | None = None,
+        session_id: str | None = None,
+    ) -> SessionState:
         user = user_id or get_user_id() or "anonymous"
-        state = SessionState(session_id=str(uuid4()), user_id=str(user), title=title, metadata=metadata or {})
+        state = SessionState(
+            session_id=session_id or str(uuid4()),
+            user_id=str(user),
+            title=title,
+            metadata=metadata or {},
+        )
         await self.save_session(state)
         return state
 

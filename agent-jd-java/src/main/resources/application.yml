@@ -20,6 +20,10 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 30MB
+  task:
+    scheduling:
+      pool:
+        size: 2
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
@@ -50,6 +54,20 @@ agent:
     response-timeout-ms: ${AGENT_RESPONSE_TIMEOUT_MS:180000}
     max-retry: ${AGENT_MAX_RETRY:2}
     retry-backoff-ms: ${AGENT_RETRY_BACKOFF_MS:300}
+  task-queue:
+    enabled: ${AGENT_TASK_QUEUE_ENABLED:true}
+    stream-key: ${AGENT_TASK_STREAM_KEY:ai:task:queue}
+    dead-letter-stream-key: ${AGENT_TASK_DLQ_KEY:ai:task:dlq}
+    group: ${AGENT_TASK_GROUP:agent-jd-worker}
+    consumer-name: ${AGENT_TASK_CONSUMER_NAME:}
+    batch-size: ${AGENT_TASK_BATCH_SIZE:5}
+    max-attempts: ${AGENT_TASK_MAX_ATTEMPTS:3}
+    retry-delay: ${AGENT_TASK_RETRY_DELAY:15s}
+    claim-idle: ${AGENT_TASK_CLAIM_IDLE:10m}
+    lock-timeout: ${AGENT_TASK_LOCK_TIMEOUT:12m}
+    recovery-interval-ms: ${AGENT_TASK_RECOVERY_INTERVAL_MS:30000}
+    pending-recovery-age: ${AGENT_TASK_PENDING_RECOVERY_AGE:10s}
+    running-recovery-age: ${AGENT_TASK_RUNNING_RECOVERY_AGE:20m}
 
 logging:
   level:

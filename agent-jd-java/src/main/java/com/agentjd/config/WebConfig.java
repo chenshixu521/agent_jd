@@ -9,7 +9,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties({com.agentjd.security.JwtProperties.class, com.agentjd.storage.LocalStorageProperties.class, com.agentjd.agent.AgentProperties.class})
+@EnableConfigurationProperties({
+        com.agentjd.security.JwtProperties.class,
+        com.agentjd.storage.LocalStorageProperties.class,
+        com.agentjd.agent.AgentProperties.class,
+        com.agentjd.task.AiTaskQueueProperties.class
+})
 public class WebConfig implements WebMvcConfigurer {
     private final JwtAuthFilter jwtAuthFilter;
 

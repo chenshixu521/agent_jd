@@ -93,11 +93,14 @@ public class AgentClient {
                     ex.isRetryable(),
                     System.currentTimeMillis() - start,
                     ex.getMessage());
-            throw new BizException(ErrorCode.AGENT_CALL_FAILED, ex.getMessage());
+            throw new BizException(ErrorCode.AGENT_CALL_FAILED, ex.getMessage(), ex.isRetryable());
         } catch (WebClientResponseException ex) {
             log.error("Python Agent HTTP error, taskUuid={}, status={}, body={}", taskUuid, ex.getStatusCode(),
                     ex.getResponseBodyAsString(), ex);
-            throw new BizException(ErrorCode.AGENT_CALL_FAILED, "AI Agent HTTP 异常: " + ex.getStatusCode());
+            throw new BizException(
+                    ErrorCode.AGENT_CALL_FAILED,
+                    "AI Agent HTTP 异常: " + ex.getStatusCode(),
+                    isRetryable(ex));
         } catch (BizException ex) {
             throw ex;
         } catch (Exception ex) {
@@ -108,7 +111,7 @@ public class AgentClient {
                     action,
                     System.currentTimeMillis() - start,
                     ex);
-            throw new BizException(ErrorCode.AGENT_CALL_FAILED, ex.getMessage());
+            throw new BizException(ErrorCode.AGENT_CALL_FAILED, ex.getMessage(), isRetryable(ex));
         }
     }
 
@@ -116,10 +119,16 @@ public class AgentClient {
         if (throwable instanceof AgentRemoteException ex) {
             return ex.isRetryable();
         }
-        return throwable instanceof TimeoutException
+        if (throwable instanceof WebClientResponseException ex) {
+            int status = ex.getStatusCode().value();
+            return status == 408 || status == 409 || status == 429 || status >= 500;
+        }
+        boolean retryable = throwable instanceof TimeoutException
                 || throwable instanceof java.io.IOException
-                || throwable instanceof WebClientResponseException.ServiceUnavailable
-                || throwable instanceof WebClientResponseException.GatewayTimeout
-                || throwable instanceof WebClientResponseException.BadGateway;
+                || throwable instanceof java.net.ConnectException;
+        if (retryable) {
+            return true;
+        }
+        return throwable.getCause() != null && throwable.getCause() != throwable && isRetryable(throwable.getCause());
     }
 }
