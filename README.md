@@ -1,5 +1,7 @@
 # AI 求职 Agent 平台（agent-jd）
 
+[![CI](https://github.com/chenshixu521/agent_jd/actions/workflows/ci.yml/badge.svg)](https://github.com/chenshixu521/agent_jd/actions/workflows/ci.yml)
+
 一个面向求职场景的全栈 AI 应用原型。项目使用 Spring Boot 管理用户、简历、JD、文件、会话和 AI 任务，使用 FastAPI + LangGraph 承载大模型工作流，前端使用 Vue 3 提供完整交互页面。
 
 > 当前版本定位为可运行、可评测的个人项目，支持 Docker Compose 一键启动。生产级任务队列、SSE 和可观测性仍在 Roadmap 中，不作为已完成功能描述。
@@ -157,6 +159,8 @@ cd agent-jd-java && mvn test
 cd agent-jd-web && npm run build
 ```
 
+推送到 `main` 或创建 Pull Request 时，GitHub Actions 会自动执行以上检查，并验证 Compose 配置和三个应用镜像的 Docker 构建。
+
 ## 当前边界
 
 - Java AI 任务目前使用进程内异步执行和前端轮询，不具备服务重启后的可靠恢复能力。
@@ -171,5 +175,5 @@ cd agent-jd-web && npm run build
 - [ ] Reranker、离线评测报告和答案忠实度评测
 - [ ] PII 脱敏、Prompt Injection 防护、调用配额与审计
 - [x] Java/Python/Web Dockerfile 与 Docker Compose 一键部署
-- [ ] GitHub Actions 自动测试与镜像构建
+- [x] GitHub Actions 自动测试与镜像构建
 - [ ] LangGraph Checkpoint、Human-in-the-loop 和更多条件路由
