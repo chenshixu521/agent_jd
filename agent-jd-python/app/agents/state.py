@@ -13,6 +13,7 @@ class AgentState(TypedDict, total=False):
     input_valid: bool
     missing_fields: list[str]
     clarification: str
+    session_id: str
     conversation: list[dict[str, str]]
     parsed_resume: dict[str, Any]
     parsed_jd: dict[str, Any]

@@ -13,7 +13,7 @@
       <el-dropdown>
         <el-button round class="user-button">
           <span class="avatar">{{ avatarText }}</span>
-          {{ auth.user?.username || '用户' }}
+          <span class="username">{{ auth.user?.username || '用户' }}</span>
         </el-button>
         <template #dropdown>
           <el-dropdown-menu>
@@ -84,6 +84,7 @@ function logout() {
 .avatar {
   width: 28px;
   height: 28px;
+  flex: 0 0 28px;
   display: inline-grid;
   place-items: center;
   border-radius: 50%;
@@ -91,6 +92,13 @@ function logout() {
   color: white;
   font-size: 12px;
   font-weight: 800;
+}
+
+.username {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 980px) {
@@ -104,6 +112,36 @@ function logout() {
 
   .header-title span {
     display: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .header {
+    height: 64px;
+    gap: 10px;
+    padding: 0 12px;
+  }
+
+  .header-title {
+    min-width: 0;
+  }
+
+  .header-title b {
+    display: block;
+    overflow: hidden;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .user-button {
+    max-width: 154px;
+  }
+
+  :deep(.user-button > span) {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
   }
 }
 </style>

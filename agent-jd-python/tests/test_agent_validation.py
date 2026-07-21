@@ -1,6 +1,6 @@
 import json
 
-from app.agents.graphs import build_resume_optimize_graph
+from app.agents.graphs import build_chat_graph, build_resume_optimize_graph
 from app.agents.nodes import validate_advice_node, validate_resume_optimize_input_node
 from app.agents.schemas import build_match_result
 from app.api.schemas.common import AgentRequest
@@ -91,6 +91,28 @@ def test_resume_optimize_graph_compiles_with_conditional_routes():
     graph = build_resume_optimize_graph()
 
     assert graph is not None
+
+
+async def test_chat_graph_preserves_session_id(monkeypatch):
+    async def fake_chat(state):
+        return {**state, "session_id": state["task_id"], "advice": "测试回复"}
+
+    async def ignore_event(*_args, **_kwargs):
+        return None
+
+    monkeypatch.setattr("app.agents.graphs.chat_node", fake_chat)
+    monkeypatch.setattr("app.agents.nodes.append_event", ignore_event)
+
+    result = await build_chat_graph().ainvoke(
+        {
+            "task_id": "task-chat-1",
+            "capability": "chat",
+            "action": "message",
+            "payload": {"message": "测试问题"},
+        }
+    )
+
+    assert result["final"]["session_id"] == "task-chat-1"
 
 
 async def test_execute_reuses_completed_task_result(monkeypatch):

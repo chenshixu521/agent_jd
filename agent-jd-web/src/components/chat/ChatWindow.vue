@@ -82,9 +82,46 @@ defineEmits<{
   gap: 16px;
 }
 
+.chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .messages {
   flex: 1;
   overflow: auto;
   padding-right: 6px;
+}
+
+@media (max-width: 640px) {
+  .chat-window :deep(.el-card__header) {
+    padding: 12px;
+  }
+
+  .chat-window :deep(.el-card__body) {
+    padding: 10px 12px;
+  }
+
+  .chat-header {
+    display: grid;
+    align-items: start;
+    gap: 8px;
+  }
+
+  .chat-header > div:first-child span {
+    display: block;
+    margin: 3px 0 0;
+  }
+
+  .chat-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    width: 100%;
+  }
+
+  .chat-actions :deep(.el-select) {
+    width: 100% !important;
+  }
 }
 </style>

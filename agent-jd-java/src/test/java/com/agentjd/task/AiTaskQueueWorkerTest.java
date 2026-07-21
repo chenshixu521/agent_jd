@@ -8,12 +8,14 @@ import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.RecordId;
 import org.springframework.data.redis.core.StreamOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 
 import java.time.Duration;
+import java.util.List;
 import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -34,7 +36,6 @@ class AiTaskQueueWorkerTest {
     @SuppressWarnings("unchecked")
     void setUp() {
         redisTemplate = mock(StringRedisTemplate.class);
-        ValueOperations<String, String> valueOperations = mock(ValueOperations.class);
         streamOperations = mock(StreamOperations.class);
         publisher = mock(AiTaskQueuePublisher.class);
         executor = mock(AiTaskExecutor.class);
@@ -42,9 +43,12 @@ class AiTaskQueueWorkerTest {
         properties.setConsumerName("test-worker");
         properties.setMaxAttempts(3);
         properties.setLockTimeout(Duration.ofMinutes(1));
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
         when(redisTemplate.opsForStream()).thenReturn(streamOperations);
-        when(valueOperations.setIfAbsent(anyString(), anyString(), any(Duration.class))).thenReturn(true);
+        when(redisTemplate.execute(
+                any(DefaultRedisScript.class),
+                anyList(),
+                anyString(),
+                anyString())).thenReturn(1L);
         when(publisher.lockKey("task-1")).thenReturn("ai:task:task-1:lock");
         worker = new AiTaskQueueWorker(redisTemplate, properties, publisher, executor);
     }
@@ -106,6 +110,17 @@ class AiTaskQueueWorkerTest {
                 new RuntimeException("BUSYGROUP Consumer Group name already exists"));
 
         assertTrue(worker.isBusyGroup(exception));
+    }
+
+    @Test
+    void reacquiresLockOwnedBySameConsumer() {
+        assertTrue(worker.acquireLock("ai:task:task-1:lock"));
+
+        verify(redisTemplate).execute(
+                any(DefaultRedisScript.class),
+                eq(List.of("ai:task:task-1:lock")),
+                eq("test-worker"),
+                eq("60000"));
     }
 
     private MapRecord<String, Object, Object> record() {

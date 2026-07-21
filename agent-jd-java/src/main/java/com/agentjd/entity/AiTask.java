@@ -1,5 +1,7 @@
 package com.agentjd.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -20,6 +22,7 @@ public class AiTask {
     private Integer progress;
     private String inputJson;
     private String outputJson;
+    @TableField(updateStrategy = FieldStrategy.ALWAYS)
     private String errorMsg;
     private String traceId;
     private LocalDateTime startedAt;

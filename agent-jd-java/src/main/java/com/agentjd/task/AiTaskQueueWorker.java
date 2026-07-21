@@ -29,6 +29,19 @@ import java.util.UUID;
 @Component
 @ConditionalOnProperty(prefix = "agent.task-queue", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class AiTaskQueueWorker {
+    private static final DefaultRedisScript<Long> ACQUIRE_LOCK_SCRIPT = new DefaultRedisScript<>("""
+            local owner = redis.call('GET', KEYS[1])
+            if not owner then
+              redis.call('SET', KEYS[1], ARGV[1], 'PX', ARGV[2])
+              return 1
+            end
+            if owner == ARGV[1] then
+              redis.call('PEXPIRE', KEYS[1], ARGV[2])
+              return 1
+            end
+            return 0
+            """, Long.class);
+
     private static final DefaultRedisScript<Long> RELEASE_LOCK_SCRIPT = new DefaultRedisScript<>("""
             if redis.call('GET', KEYS[1]) == ARGV[1] then
               return redis.call('DEL', KEYS[1])
@@ -79,9 +92,7 @@ public class AiTaskQueueWorker {
         }
 
         String lockKey = publisher.lockKey(taskUuid);
-        Boolean locked = stringRedisTemplate.opsForValue()
-                .setIfAbsent(lockKey, consumerName, properties.getLockTimeout());
-        if (!Boolean.TRUE.equals(locked)) {
+        if (!acquireLock(lockKey)) {
             return;
         }
 
@@ -218,6 +229,15 @@ public class AiTaskQueueWorker {
 
     private void releaseLock(String lockKey) {
         stringRedisTemplate.execute(RELEASE_LOCK_SCRIPT, List.of(lockKey), consumerName);
+    }
+
+    boolean acquireLock(String lockKey) {
+        Long result = stringRedisTemplate.execute(
+                ACQUIRE_LOCK_SCRIPT,
+                List.of(lockKey),
+                consumerName,
+                String.valueOf(properties.getLockTimeout().toMillis()));
+        return Long.valueOf(1L).equals(result);
     }
 
     private String errorMessage(Exception ex) {

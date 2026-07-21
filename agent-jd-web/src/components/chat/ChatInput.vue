@@ -43,4 +43,21 @@ function onUpload(file: UploadFile) {
   padding-top: 12px;
   border-top: 1px solid var(--border);
 }
+
+@media (max-width: 640px) {
+  .chat-input {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+
+  .chat-input :deep(.el-textarea) {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .chat-input > .el-button {
+    min-width: 72px;
+  }
+}
 </style>

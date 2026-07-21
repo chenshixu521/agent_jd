@@ -38,4 +38,25 @@ const route = useRoute()
   overflow: hidden;
   padding: 0;
 }
+
+@media (max-width: 768px) {
+  .app-shell {
+    display: block;
+  }
+
+  .content-shell {
+    min-height: 100vh;
+    padding-bottom: 68px;
+  }
+
+  .app-main {
+    min-height: calc(100vh - 132px);
+    padding: 16px;
+  }
+
+  .dashboard-main {
+    height: calc(100vh - 132px);
+    padding: 0;
+  }
+}
 </style>

@@ -88,4 +88,40 @@ import { BriefcaseBusiness, FileUp, Gauge, House, PenTool, Sparkles } from 'luci
   background: rgba(255, 255, 255, .1);
   color: white;
 }
+
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    width: 100% !important;
+    height: 68px;
+    padding: 4px 6px;
+    border-top: 1px solid rgba(255, 255, 255, .12);
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .menu {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    height: 100%;
+  }
+
+  :deep(.el-menu-item) {
+    min-width: 0;
+    height: 58px;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    margin: 0 1px;
+    padding: 0 !important;
+    font-size: 10px;
+    line-height: 1;
+  }
+}
 </style>

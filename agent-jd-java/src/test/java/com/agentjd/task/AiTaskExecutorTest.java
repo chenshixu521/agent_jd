@@ -1,6 +1,8 @@
 package com.agentjd.task;
 
 import com.agentjd.agent.AgentClient;
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.agentjd.entity.AiTask;
 import com.agentjd.entity.AiTaskStatus;
 import com.agentjd.mapper.AiTaskMapper;
@@ -16,6 +18,13 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 class AiTaskExecutorTest {
+
+    @Test
+    void persistsNullWhenClearingTaskError() throws NoSuchFieldException {
+        TableField annotation = AiTask.class.getDeclaredField("errorMsg").getAnnotation(TableField.class);
+
+        assertEquals(FieldStrategy.ALWAYS, annotation.updateStrategy());
+    }
 
     @Test
     void executesPendingTaskAndStoresSuccess() {
