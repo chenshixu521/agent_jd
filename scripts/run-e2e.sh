@@ -47,3 +47,8 @@ if [ "${E2E_PLAYWRIGHT_DOCKER:-false}" = "true" ]; then
 else
     E2E_BASE_URL="http://127.0.0.1:$web_port" npm run test:e2e
 fi
+
+"${compose[@]}" exec -T java sh -ec \
+    "curl -fsS http://127.0.0.1:8080/actuator/prometheus | grep -q agent_jd_tasks_completed_total"
+"${compose[@]}" exec -T python python -c \
+    "import urllib.request; body = urllib.request.urlopen('http://127.0.0.1:8000/metrics').read(); assert b'agent_jd_llm_requests_total' in body"

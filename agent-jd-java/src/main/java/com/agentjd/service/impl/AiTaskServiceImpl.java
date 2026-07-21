@@ -8,6 +8,7 @@ import com.agentjd.entity.AiTaskStatus;
 import com.agentjd.mapper.AiTaskMapper;
 import com.agentjd.service.AiTaskService;
 import com.agentjd.task.AiTaskQueuePublisher;
+import com.agentjd.task.AiTaskMetrics;
 import com.agentjd.task.AiTaskSupport;
 import com.agentjd.vo.AiTaskVO;
 import com.agentjd.security.UserContextHolder;
@@ -31,6 +32,7 @@ public class AiTaskServiceImpl implements AiTaskService {
     private final AiTaskMapper aiTaskMapper;
     private final AiTaskQueuePublisher queuePublisher;
     private final AiTaskSupport taskSupport;
+    private final AiTaskMetrics metrics;
 
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -51,17 +53,18 @@ public class AiTaskServiceImpl implements AiTaskService {
         task.setUpdatedAt(LocalDateTime.now());
         aiTaskMapper.insert(task);
         taskSupport.cache(task);
-        enqueueAfterCommit(task.getTaskUuid());
+        enqueueAfterCommit(task);
         return detail(task.getTaskUuid());
     }
 
-    private void enqueueAfterCommit(String taskUuid) {
+    private void enqueueAfterCommit(AiTask task) {
         Runnable enqueue = () -> {
+            metrics.recordSubmitted(task);
             try {
-                queuePublisher.enqueueIfMissing(taskUuid);
+                queuePublisher.enqueueIfMissing(task.getTaskUuid());
             } catch (Exception ex) {
                 log.error("Enqueue AI task failed; recovery scanner will retry, taskUuid={}, reason={}",
-                        taskUuid, ex.getMessage(), ex);
+                        task.getTaskUuid(), ex.getMessage(), ex);
             }
         };
         if (TransactionSynchronizationManager.isSynchronizationActive()) {

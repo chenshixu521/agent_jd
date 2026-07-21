@@ -1,5 +1,7 @@
 from fastapi import FastAPI
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
+from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.api.v1 import api_router
 from app.core.errors import AgentError, agent_error_handler, unhandled_error_handler
@@ -19,3 +21,8 @@ app.add_middleware(
 app.add_exception_handler(AgentError, agent_error_handler)
 app.add_exception_handler(Exception, unhandled_error_handler)
 app.include_router(api_router)
+
+
+@app.get("/metrics", include_in_schema=False)
+async def metrics() -> Response:
+    return Response(content=generate_latest(), headers={"Content-Type": CONTENT_TYPE_LATEST})

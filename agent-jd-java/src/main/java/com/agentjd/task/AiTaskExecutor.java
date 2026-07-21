@@ -20,6 +20,7 @@ public class AiTaskExecutor {
     private final AiTaskMapper aiTaskMapper;
     private final AgentClient agentClient;
     private final AiTaskSupport taskSupport;
+    private final AiTaskMetrics metrics;
 
     public ExecutionResult execute(String taskUuid) {
         AiTask task = findTask(taskUuid);
@@ -44,6 +45,7 @@ public class AiTaskExecutor {
             task.setUpdatedAt(LocalDateTime.now());
             aiTaskMapper.updateById(task);
             taskSupport.cache(task);
+            metrics.recordCompleted(task, "success");
             return ExecutionResult.SUCCESS;
         } finally {
             UserContextHolder.clear();
@@ -63,6 +65,7 @@ public class AiTaskExecutor {
         task.setUpdatedAt(LocalDateTime.now());
         aiTaskMapper.updateById(task);
         taskSupport.cache(task);
+        metrics.recordRetry(task);
     }
 
     public void markFailed(String taskUuid, String message) {
@@ -77,6 +80,8 @@ public class AiTaskExecutor {
         task.setUpdatedAt(LocalDateTime.now());
         aiTaskMapper.updateById(task);
         taskSupport.cache(task);
+        metrics.recordCompleted(task, "failed");
+        metrics.recordDeadLetter(task);
     }
 
     private void markRunning(AiTask task) {

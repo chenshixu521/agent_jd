@@ -1,0 +1,110 @@
+{
+  "annotations": {"list": []},
+  "editable": false,
+  "graphTooltip": 1,
+  "panels": [
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"max": 100, "min": 0, "unit": "percent"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 6, "x": 0, "y": 0},
+      "id": 1,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "100 * sum(rate(agent_jd_tasks_completed_total{outcome=\"success\"}[5m])) / clamp_min(sum(rate(agent_jd_tasks_completed_total[5m])), 0.000001)", "legendFormat": "success rate", "refId": "A"}],
+      "title": "Task Success Rate (5m)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+      "id": 2,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "histogram_quantile(0.95, sum(rate(agent_jd_task_duration_seconds_bucket[5m])) by (le))", "legendFormat": "P95", "refId": "A"}],
+      "title": "Task End-to-End P95 (5m)",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+      "id": 3,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(increase(agent_jd_task_retries_total[$__range]))", "legendFormat": "retries", "refId": "A"}],
+      "title": "Retries in Range",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+      "id": 4,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(increase(agent_jd_task_dlq_total[$__range]))", "legendFormat": "DLQ", "refId": "A"}],
+      "title": "DLQ in Range",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "ops"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+      "id": 5,
+      "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "sum(rate(agent_jd_tasks_completed_total[5m])) by (outcome)", "legendFormat": "{{outcome}}", "refId": "A"}],
+      "title": "Task Throughput by Outcome",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "s"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+      "id": 6,
+      "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [
+        {"expr": "histogram_quantile(0.95, sum(rate(agent_jd_agent_request_duration_seconds_bucket[5m])) by (le, capability, action))", "legendFormat": "agent {{capability}}/{{action}}", "refId": "A"},
+        {"expr": "histogram_quantile(0.95, sum(rate(agent_jd_llm_request_duration_seconds_bucket[5m])) by (le, provider, model))", "legendFormat": "llm {{provider}}/{{model}}", "refId": "B"}
+      ],
+      "title": "Agent and LLM P95 Latency",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+      "id": 7,
+      "options": {"legend": {"calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true}, "tooltip": {"mode": "multi", "sort": "desc"}},
+      "targets": [{"expr": "sum(increase(agent_jd_llm_tokens_total[$__range])) by (token_type)", "legendFormat": "{{token_type}}", "refId": "A"}],
+      "title": "LLM Tokens in Range",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"decimals": 6, "unit": "currencyUSD"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 6, "x": 12, "y": 14},
+      "id": 8,
+      "options": {"colorMode": "value", "graphMode": "area", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(agent_jd_llm_cost_usd_total)", "legendFormat": "estimated cost", "refId": "A"}],
+      "title": "Estimated LLM Cost",
+      "type": "stat"
+    },
+    {
+      "datasource": {"type": "prometheus", "uid": "agent-jd-prometheus"},
+      "fieldConfig": {"defaults": {"unit": "short"}, "overrides": []},
+      "gridPos": {"h": 8, "w": 6, "x": 18, "y": 14},
+      "id": 9,
+      "options": {"colorMode": "value", "graphMode": "none", "justifyMode": "auto", "orientation": "auto", "reduceOptions": {"calcs": ["lastNotNull"], "fields": "", "values": false}, "textMode": "auto"},
+      "targets": [{"expr": "sum(increase(agent_jd_task_recoveries_total[$__range]))", "legendFormat": "recoveries", "refId": "A"}],
+      "title": "Recovered Tasks in Range",
+      "type": "stat"
+    }
+  ],
+  "refresh": "10s",
+  "schemaVersion": 39,
+  "tags": ["agent-jd", "ai", "tasks"],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Agent JD Overview",
+  "uid": "agent-jd-overview",
+  "version": 1
+}

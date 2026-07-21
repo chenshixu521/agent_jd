@@ -20,6 +20,7 @@ public class AiTaskQueueRecovery {
     private final AiTaskMapper aiTaskMapper;
     private final AiTaskQueuePublisher publisher;
     private final AiTaskQueueProperties properties;
+    private final AiTaskMetrics metrics;
 
     @Scheduled(fixedDelayString = "${agent.task-queue.recovery-interval-ms:30000}")
     public void republishOrphanedTasks() {
@@ -38,6 +39,7 @@ public class AiTaskQueueRecovery {
         for (AiTask task : aiTaskMapper.selectList(query)) {
             try {
                 if (publisher.enqueueIfMissing(task.getTaskUuid())) {
+                    metrics.recordRecovery(task);
                     log.info("Republished orphaned AI task, taskUuid={}, status={}", task.getTaskUuid(), task.getStatus());
                 }
             } catch (Exception ex) {

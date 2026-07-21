@@ -69,6 +69,15 @@ agent:
     pending-recovery-age: ${AGENT_TASK_PENDING_RECOVERY_AGE:10s}
     running-recovery-age: ${AGENT_TASK_RUNNING_RECOVERY_AGE:20m}
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
 logging:
   level:
     root: INFO

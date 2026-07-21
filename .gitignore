@@ -22,6 +22,11 @@ agent-jd-web/node_modules/
 agent-jd-web/dist/
 agent-jd-web/playwright-report/
 agent-jd-web/test-results/
+reports/load-test-summary.json
+reports/load-test-compose.log
+reports/load-test.html
+reports/load-test_*.csv
+.load-venv/
 
 # IDE
 .idea/

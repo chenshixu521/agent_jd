@@ -1,6 +1,8 @@
 import asyncio
+from time import perf_counter
 from typing import Any
 
+from app.core.metrics import record_llm_call
 from app.core.settings import settings
 from app.llm.base import LLMProvider
 
@@ -9,7 +11,37 @@ class FakeLLMProvider(LLMProvider):
     """Deterministic provider for local and CI end-to-end tests."""
 
     async def chat(self, messages: list[dict[str, str]], **kwargs: Any) -> str:
-        await self._delay()
+        started = perf_counter()
+        try:
+            await self._delay()
+            result = self._chat_response(messages)
+        except Exception:
+            record_llm_call("fake", "deterministic", "chat", "failed", perf_counter() - started)
+            raise
+        record_llm_call("fake", "deterministic", "chat", "success", perf_counter() - started)
+        return result
+
+    async def json_mode(self, messages: list[dict[str, str]], **kwargs: Any) -> dict[str, Any]:
+        started = perf_counter()
+        try:
+            await self._delay()
+            result = {
+                "total_score": 82,
+                "hard_score": 84,
+                "soft_score": 78,
+                "exp_score": 80,
+                "suggestions": ["补充自动化测试证据", "说明 Redis 任务恢复机制"],
+                "summary": "候选人的 Java、Redis 与 AI 应用经验和岗位要求具有较高匹配度。",
+                "risks": ["需要进一步说明生产环境的监控与容量验证"],
+                "advantages": ["具备完整的 Java 与 Python Agent 协作实践"],
+            }
+        except Exception:
+            record_llm_call("fake", "deterministic", "json", "failed", perf_counter() - started)
+            raise
+        record_llm_call("fake", "deterministic", "json", "success", perf_counter() - started)
+        return result
+
+    def _chat_response(self, messages: list[dict[str, str]]) -> str:
         system_prompt = messages[0].get("content", "") if messages else ""
         full_prompt = "\n".join(message.get("content", "") for message in messages)
 
@@ -38,19 +70,6 @@ class FakeLLMProvider(LLMProvider):
             "## 项目描述优化方向\n\n"
             "使用可复现测试结果支撑可靠性描述，并保留关键技术取舍。"
         )
-
-    async def json_mode(self, messages: list[dict[str, str]], **kwargs: Any) -> dict[str, Any]:
-        await self._delay()
-        return {
-            "total_score": 82,
-            "hard_score": 84,
-            "soft_score": 78,
-            "exp_score": 80,
-            "suggestions": ["补充自动化测试证据", "说明 Redis 任务恢复机制"],
-            "summary": "候选人的 Java、Redis 与 AI 应用经验和岗位要求具有较高匹配度。",
-            "risks": ["需要进一步说明生产环境的监控与容量验证"],
-            "advantages": ["具备完整的 Java 与 Python Agent 协作实践"],
-        }
 
     async def _delay(self) -> None:
         delay_ms = max(0, settings.fake_llm_delay_ms)

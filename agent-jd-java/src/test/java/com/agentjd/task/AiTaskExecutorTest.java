@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.agentjd.entity.AiTask;
 import com.agentjd.entity.AiTaskStatus;
 import com.agentjd.mapper.AiTaskMapper;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,6 +33,7 @@ class AiTaskExecutorTest {
         AiTaskMapper mapper = mock(AiTaskMapper.class);
         AgentClient agentClient = mock(AgentClient.class);
         AiTaskSupport support = mock(AiTaskSupport.class);
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
         AiTask task = task(AiTaskStatus.PENDING);
         when(mapper.selectOne(any())).thenReturn(task);
         when(support.input(task)).thenReturn(Map.of("jd_text", "Java Redis"));
@@ -38,13 +41,20 @@ class AiTaskExecutorTest {
                 .thenReturn(Map.of("keywords", java.util.List.of("Java", "Redis")));
         when(support.toJson(any())).thenReturn("{\"keywords\":[\"Java\",\"Redis\"]}");
 
-        AiTaskExecutor.ExecutionResult result = new AiTaskExecutor(mapper, agentClient, support).execute("task-1");
+        AiTaskExecutor.ExecutionResult result = new AiTaskExecutor(
+                mapper, agentClient, support, new AiTaskMetrics(registry)).execute("task-1");
 
         assertEquals(AiTaskExecutor.ExecutionResult.SUCCESS, result);
         assertEquals(AiTaskStatus.SUCCESS.getCode(), task.getStatus());
         assertEquals(100, task.getProgress());
         verify(mapper, org.mockito.Mockito.times(2)).updateById(task);
         verify(support, org.mockito.Mockito.times(2)).cache(task);
+        assertEquals(1.0, registry.get("agent.jd.tasks.completed")
+                .tags("capability", "jd", "action", "analyze", "outcome", "success")
+                .counter().count());
+        assertEquals(1L, registry.get("agent.jd.task.duration")
+                .tags("capability", "jd", "action", "analyze", "outcome", "success")
+                .timer().count());
     }
 
     @Test
@@ -52,9 +62,11 @@ class AiTaskExecutorTest {
         AiTaskMapper mapper = mock(AiTaskMapper.class);
         AgentClient agentClient = mock(AgentClient.class);
         AiTaskSupport support = mock(AiTaskSupport.class);
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
         when(mapper.selectOne(any())).thenReturn(task(AiTaskStatus.SUCCESS));
 
-        AiTaskExecutor.ExecutionResult result = new AiTaskExecutor(mapper, agentClient, support).execute("task-1");
+        AiTaskExecutor.ExecutionResult result = new AiTaskExecutor(
+                mapper, agentClient, support, new AiTaskMetrics(registry)).execute("task-1");
 
         assertEquals(AiTaskExecutor.ExecutionResult.ALREADY_FINISHED, result);
         verify(agentClient, never()).call(any(), any(), any(), any());
@@ -70,6 +82,7 @@ class AiTaskExecutorTest {
         task.setTraceId("trace-1");
         task.setStatus(status.getCode());
         task.setProgress(0);
+        task.setCreatedAt(LocalDateTime.now().minusSeconds(1));
         return task;
     }
 }
